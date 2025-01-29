@@ -465,7 +465,7 @@ export default {
   name: "ProfileView",
   data() {
     return {
-      Bio: "Hiiiiiiiiiiii~!",
+      Bio: "A 16-year-old, discord bot developer",
       Description: '"She a pure Magic..?!"',
       socialLinks: [
         {
