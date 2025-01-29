@@ -546,7 +546,7 @@ export default {
       ],
       tools: [
         { id: 1, name: "Discord PTB", icon: "ri-discord-line" },
-        { id: 2, name: "Visual Studio Code", icon: "ri-visual-studio-line" },
+        { id: 2, name: "Visual Studio Code", icon: "ri-code-line" },
         { id: 3, name: "Visual Studio", icon: "ri-window-line" },
         { id: 4, name: "Firefox Nightly", icon: "ri-firefox-line" },
       ],
