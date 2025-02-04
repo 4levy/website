@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --primary: #ff69b4;
+  --primary-hover: #ff8ac7;
+  --secondary: #6495ed;
+  --background: #1a1325;
+  --surface: #2a1f37;
+  --text: #ffffff;
+  --text-secondary: #d8b5e8;
+}
+
+body {
+  font-family: monospace;
+  background-color: var(--background);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+h1 {
+  background: linear-gradient(to right, #ff69b4, #6495ed);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 2px 15px rgba(255, 105, 180, 0.2);
+  font-size: 2.5rem !important;
+  letter-spacing: -0.5px;
+}
+
+.rounded-lg {
+  box-shadow: 0 4px 20px -5px rgba(255, 105, 180, 0.2);
+  border: 1px solid rgba(255, 105, 180, 0.1);
+  transition: all 0.2s ease-in-out;
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem !important;
+  }
+  
+  .p-8 {
+    padding: 1rem;
+  }
+}

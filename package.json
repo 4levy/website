@@ -1,5 +1,5 @@
 {
-  "name": "bio",
+  "name": "project",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -9,14 +9,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "proton-engine": "^6.0.3",
-    "raf-manager": "^0.3.0",
     "vue": "^3.5.13"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.2.1",
-    "eslint": "^9.18.0",
-    "sass-embedded": "^1.83.4",
-    "vite": "^6.0.5"
+    "@vitejs/plugin-vue": "^5.0.0",
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.3.5",
+    "vite": "^5.0.0"
   }
 }
