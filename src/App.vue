@@ -24,7 +24,6 @@
             <img
               src="https://count.getloli.com/@4levy?name=4levy&theme=booru-qualityhentais"
               class="rounded-lg"
-              alt="Counter"
             />
           </div>
         </div>
