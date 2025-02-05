@@ -1,25 +1,27 @@
 <template>
   <Snowfall />
-  <div class="min-h-screen bg-gray-900 text-gray-200 p-8" @contextmenu.prevent>
+  <div class="min-h-screen bg-gray-900 text-gray-200 p-4 sm:p-8" @contextmenu.prevent>
     <Alert :show="showAlert" :message="alertMessage" />
     <div class="max-w-4xl mx-auto">
-      <header class="flex flex-col md:flex-row justify-between items-start mb-12">
-        <div class="flex-1">
-          <h1 class="text-3xl font-bold mb-4">{{ profile.name }}</h1>
-          <p class="mb-4">{{ profile.bio }}</p>
-          <p class="text-gray-400">{{ profile.note }}</p>
+      <header class="flex flex-col items-center md:flex-row md:items-start gap-6 mb-8 md:mb-12">
+        <div class="flex-1 text-center md:text-left">
+          <h1 class="text-4xl font-bold mb-4">{{ profile.name }}</h1>
+          <p class="text-lg mb-4">{{ profile.bio }}</p>
+          <p class="text-gray-400 text-sm">{{ profile.note }}</p>
         </div>
-        <div class="mt-6 md:mt-0">
+        <div class="flex flex-col gap-4 items-center">
           <img 
             src="https://i.postimg.cc/rs37f0sN/a154648b79b7119a3bfaf1cdbb4b133e.png"
-            class="rounded-lg"
+            class="rounded-lg w-48 md:w-64 h-auto shadow-lg"
+            alt="Profile"
           />
-        </div>
-        <div class="mt-6 md:mt-0">
-          <img 
-            src="https://count.getloli.com/@4levy?name=4levy&theme=booru-qualityhentais"
-            class="rounded-lg"
-          />
+          <div class="counter-container w-full px-2">
+            <img 
+              src="https://count.getloli.com/@4levy?name=4levy&theme=booru-qualityhentais"
+              class="rounded-lg w-full max-w-[200px] md:max-w-[256px] h-auto mx-auto shadow-md"
+              alt="Counter"
+            />
+          </div>
         </div>
       </header>
     </div> 
@@ -129,3 +131,12 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.counter-container {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  backdrop-filter: blur(5px);
+}
+</style>
