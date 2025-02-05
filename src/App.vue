@@ -10,13 +10,15 @@
         class="flex flex-col items-center md:flex-row md:items-start gap-6 mb-8 md:mb-12"
       >
         <div class="flex-1 text-center md:text-left">
-          <h1 class="text-4xl font-bold mb-4 glowing-text ">{{ profile.name }}</h1>
+          <h1 class="text-4xl font-bold mb-4 glowing-text">
+            {{ profile.name }}
+          </h1>
           <p class="text-lg mb-4">{{ profile.bio }}</p>
           <p class="text-gray-400 text-sm">{{ profile.note }}</p>
         </div>
         <div class="flex flex-col gap-4 items-center">
           <img
-            src="https://i.postimg.cc/rs37f0sN/a154648b79b7119a3bfaf1cdbb4b133e.png"
+            :src="profile.avatar"
             class="rounded-lg w-48 md:w-64 h-auto shadow-lg"
             alt="Profile"
           />
@@ -48,18 +50,64 @@ export default {
         name: "4levy",
         bio: "I am a 16 y/o, discord bot developer.",
         note: "why are you even here?",
+        avatar:
+          "https://i.postimg.cc/jSpxRd4F/ezgif-7-880e4f2ec3OHO.gif",
       },
       showAlert: false,
       alertMessage: "",
       alertTimeout: null,
       showSnowfall: true,
+      ws: null,
+      DISCORD_ID: "874898422233178142",
     };
   },
   mounted() {
     document.addEventListener("keydown", this.preventDevTools);
     this.detectDevTools();
+    this.connectWebsocket();
   },
   methods: {
+    connectWebsocket() {
+      this.ws = new WebSocket("wss://api.lanyard.rest/socket");
+
+      this.ws.onopen = () => {
+        this.ws.send(
+          JSON.stringify({
+            op: 2,
+            d: {
+              subscribe_to_id: this.DISCORD_ID,
+            },
+          })
+        );
+      };
+
+      this.ws.onmessage = ({ data }) => {
+        const received = JSON.parse(data);
+
+        if (received.op === 1) {
+          this.ws.send(JSON.stringify({ op: 3 }));
+        }
+
+        if (received.op === 0) {
+          if (received.t === "INIT_STATE" || received.t === "PRESENCE_UPDATE") {
+            this.updateProfile(received.d);
+          }
+        }
+      };
+
+      this.ws.onclose = () => {
+        setTimeout(this.connectWebsocket, 1000);
+      };
+    },
+
+    updateProfile(data) {
+      if (data.discord_user) {
+        const avatarId = data.discord_user.avatar;
+        const userId = data.discord_user.id;
+        this.profile.avatar = `https://cdn.discordapp.com/avatars/${userId}/${avatarId}.png?size=256`;
+      }
+    },
+
     showAlertMessage(message) {
       this.alertMessage = message;
       this.showAlert = true;
@@ -72,10 +120,12 @@ export default {
         this.showAlert = false;
       }, 2000);
     },
+
     handleRightClick(event) {
       event.preventDefault();
       this.showAlertMessage("Right-click is disabled on this page!");
     },
+
     preventDevTools(e) {
       const devToolsKeys = [
         { key: "F12", message: "Developer tools are not allowed (F12)!" },
@@ -109,6 +159,7 @@ export default {
         }
       });
     },
+
     detectDevTools() {
       const threshold = 160;
 
@@ -133,6 +184,9 @@ export default {
     if (this.alertTimeout) {
       clearTimeout(this.alertTimeout);
     }
+    if (this.ws) {
+      this.ws.close();
+    }
   },
 };
 </script>
@@ -141,35 +195,20 @@ export default {
 @keyframes pink-glow {
   0% {
     color: #fff;
-    text-shadow: 0 0 5px #ff69b4,
-                 0 0 10px #ff69b4,
-                 0 0 15px #ff69b4,
-                 0 0 20px #ff1493,
-                 0 0 35px #ff1493,
-                 0 0 40px #ff1493,
-                 0 0 50px #ff1493;
+    text-shadow: 0 0 5px #ff69b4, 0 0 10px #ff69b4, 0 0 15px #ff69b4,
+      0 0 20px #ff1493, 0 0 35px #ff1493, 0 0 40px #ff1493, 0 0 50px #ff1493;
   }
-  
+
   50% {
     color: #ffe6f2;
-    text-shadow: 0 0 7px #ff69b4,
-                 0 0 12px #ff69b4,
-                 0 0 17px #ff69b4,
-                 0 0 22px #ff1493,
-                 0 0 37px #ff1493,
-                 0 0 42px #ff1493,
-                 0 0 52px #ff1493;
+    text-shadow: 0 0 7px #ff69b4, 0 0 12px #ff69b4, 0 0 17px #ff69b4,
+      0 0 22px #ff1493, 0 0 37px #ff1493, 0 0 42px #ff1493, 0 0 52px #ff1493;
   }
-  
+
   100% {
     color: #fff;
-    text-shadow: 0 0 5px #ff69b4,
-                 0 0 10px #ff69b4,
-                 0 0 15px #ff69b4,
-                 0 0 20px #ff1493,
-                 0 0 35px #ff1493,
-                 0 0 40px #ff1493,
-                 0 0 50px #ff1493;
+    text-shadow: 0 0 5px #ff69b4, 0 0 10px #ff69b4, 0 0 15px #ff69b4,
+      0 0 20px #ff1493, 0 0 35px #ff1493, 0 0 40px #ff1493, 0 0 50px #ff1493;
   }
 }
 
