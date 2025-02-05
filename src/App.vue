@@ -15,6 +15,12 @@
             class="rounded-lg"
           />
         </div>
+        <div class="mt-6 md:mt-0">
+          <img 
+            src="https://count.getloli.com/@4levy?name=4levy&theme=booru-qualityhentais"
+            class="rounded-lg"
+          />
+        </div>
       </header>
     </div> 
   </div>
