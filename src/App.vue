@@ -35,8 +35,7 @@ export default {
       profile: {
         name: '4levy',
         bio: 'I am a 16 y/o, discord bot developer.',
-        note: 'this website got nothing',
-        artCredit: 'V3SS33L'
+        note: 'this website got nothing'
       },
       showAlert: false,
       alertMessage: '',
