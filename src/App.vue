@@ -49,7 +49,7 @@ export default {
       profile: {
         name: "4levy",
         bio: "I am a 16 y/o, discord bot developer.",
-        note: "why are you even here?",
+        note: "Freelancer",
         avatar:
           "https://i.postimg.cc/jSpxRd4F/ezgif-7-880e4f2ec3OHO.gif",
       },
