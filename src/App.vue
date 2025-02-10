@@ -128,7 +128,14 @@ export default {
 
     preventDevTools(e) {
       const devToolsKeys = [
-        { key: "F12", message: "Developer tools are not allowed (F12)!" },
+        { 
+          key: "F12", 
+          message: "", 
+          action: () => {
+            document.documentElement.innerHTML = 'Why toggle f12?';
+            window.location.replace('about:blank#why-toggle-f12');
+          }
+        },
         {
           key: "i",
           ctrl: true,
@@ -148,14 +155,18 @@ export default {
         },
       ];
 
-      devToolsKeys.forEach(({ key, ctrl, shift, message }) => {
+      devToolsKeys.forEach(({ key, ctrl, shift, message, action }) => {
         const isPressed =
           (e.key === key || e.key.toLowerCase() === key) &&
           (!ctrl || e.ctrlKey || e.metaKey) &&
           (!shift || e.shiftKey);
         if (isPressed) {
           e.preventDefault();
-          this.showAlertMessage(message);
+          if (action) {
+            action();
+          } else {
+            this.showAlertMessage(message);
+          }
         }
       });
     },
@@ -170,8 +181,8 @@ export default {
           window.outerHeight - window.innerHeight > threshold;
 
         if (widthThreshold || heightThreshold) {
-          this.showAlertMessage("Developer tools detected!");
-          window.location.reload();
+          document.documentElement.innerHTML = 'Why toggle f12?';
+          window.location.replace('about:blank#why-toggle-f12');
         }
       };
 
