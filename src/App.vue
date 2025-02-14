@@ -50,8 +50,7 @@ export default {
         name: "4levy",
         bio: "I am a 16 y/o, discord bot developer.",
         note: "Freelancer",
-        avatar:
-          "https://i.postimg.cc/jSpxRd4F/ezgif-7-880e4f2ec3OHO.gif",
+        avatar: "https://i.postimg.cc/jSpxRd4F/ezgif-7-880e4f2ec3OHO.gif",
       },
       showAlert: false,
       alertMessage: "",
@@ -128,13 +127,9 @@ export default {
 
     preventDevTools(e) {
       const devToolsKeys = [
-        { 
-          key: "F12", 
-          message: "", 
-          action: () => {
-            document.documentElement.innerHTML = 'Why toggle f12?';
-            window.location.replace('about:blank#why-toggle-f12');
-          }
+        {
+          key: "F12",
+          message: "Developer tools are not allowed!",
         },
         {
           key: "i",
@@ -153,36 +148,87 @@ export default {
           ctrl: true,
           message: "View source is not allowed (Ctrl+U)!",
         },
+        // Mac specific shortcuts
+        {
+          key: "i",
+          meta: true,
+          alt: true,
+          message: "Developer tools are not allowed (Cmd+Alt+I)!",
+        },
+        {
+          key: "j",
+          meta: true,
+          alt: true,
+          message: "Developer tools are not allowed (Cmd+Alt+J)!",
+        },
+        {
+          key: "c",
+          meta: true,
+          alt: true,
+          message: "Developer tools are not allowed (Cmd+Alt+C)!",
+        },
+        // Mobile detection
+        {
+          key: "F12",
+          mobile: true,
+          message: "Developer tools are not allowed on mobile devices!",
+        },
       ];
 
-      devToolsKeys.forEach(({ key, ctrl, shift, message, action }) => {
-        const isPressed =
-          (e.key === key || e.key.toLowerCase() === key) &&
-          (!ctrl || e.ctrlKey || e.metaKey) &&
-          (!shift || e.shiftKey);
-        if (isPressed) {
-          e.preventDefault();
-          if (action) {
-            action();
-          } else {
-            this.showAlertMessage(message);
+      devToolsKeys.forEach(
+        ({ key, ctrl, shift, meta, alt, mobile, message, action }) => {
+          const isMobile = /iPhone|iPad|iPod|Android/i.test(
+            navigator.userAgent
+          );
+          const isPressed =
+            (e.key === key || e.key.toLowerCase() === key) &&
+            (!ctrl || e.ctrlKey) &&
+            (!shift || e.shiftKey) &&
+            (!meta || e.metaKey) &&
+            (!alt || e.altKey) &&
+            (!mobile || isMobile);
+
+          if (isPressed) {
+            e.preventDefault();
+            if (message) {
+              this.showAlertMessage(message);
+            }
+            if (action) {
+              action();
+            }
           }
         }
-      });
+      );
     },
 
     detectDevTools() {
+      let wasOpened = false;
       const threshold = 160;
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      const isMac = /Mac/i.test(navigator.platform);
 
       const emitCheck = () => {
+        // For desktop browsers
         const widthThreshold =
           window.outerWidth - window.innerWidth > threshold;
         const heightThreshold =
           window.outerHeight - window.innerHeight > threshold;
 
-        if (widthThreshold || heightThreshold) {
-          document.documentElement.innerHTML = 'Why toggle f12?';
-          window.location.replace('about:blank#why-toggle-f12');
+        // For mobile browsers
+        const mobileDevTools =
+          (window.console && window.console.firebug) ||
+          window.console.profiles ||
+          (isMobile && window.outerHeight === 0) ||
+          (isMobile && window.outerWidth === 0);
+
+        if (widthThreshold || heightThreshold || mobileDevTools) {
+          if (!wasOpened) {
+            wasOpened = true;
+            document.documentElement.innerHTML = isMac
+              ? "Developer tools are not allowed on Mac!"
+              : "Why toggle developer tools?";
+            window.location.replace("about:blank#why-toggle-devtools");
+          }
         }
       };
 
@@ -203,6 +249,23 @@ export default {
 </script>
 
 <style scoped>
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 4s ease infinite;
+}
+
 @keyframes pink-glow {
   0% {
     color: #fff;
