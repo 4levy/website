@@ -14,13 +14,28 @@
             {{ profile.name }}
           </h1>
           <p class="text-lg mb-4">{{ profile.bio }}</p>
-          <p class="text-gray-400 text-sm">{{ profile.note }}</p>
+          <p class="text-gray-400 text-sm mb-4">{{ profile.note }}</p>
+          <div class="skills-section">
+            <h2 class="text-2xl font-semibold mb-3">Skills : </h2>
+            <div class="flex flex-wrap gap-2">
+              <span
+                v-for="(skill, index) in profile.skills"
+                :key="index"
+                class="px-3 py-1 bg-gray-800 rounded-full text-sm hover:bg-gray-700 transition-colors"
+              >
+                {{ skill }}
+                <br>
+              </span>
+              <br>
+            </div>
+          </div>
         </div>
         <div class="flex flex-col gap-4 items-center">
           <img
             :src="profile.avatar"
             class="rounded-lg w-48 md:w-64 h-auto shadow-lg"
             alt="Profile"
+            onerror="avatar"
           />
           <div class="counter-container w-full px-2">
             <img
@@ -31,6 +46,9 @@
         </div>
       </header>
     </div>
+    <footer class="text-center text-gray-400 text-sm mt-8">
+      <p>&copy; {{ new Date().getFullYear() }} 4levy. All rights reserved.</p>
+    </footer>
   </div>
 </template>
 
@@ -51,6 +69,15 @@ export default {
         bio: "I am a 16 y/o, discord bot developer.",
         note: "Freelancer",
         avatar: "https://i.postimg.cc/jSpxRd4F/ezgif-7-880e4f2ec3OHO.gif",
+        skills: [
+          "JavaScript",
+          "Node.js",
+          "Discord.js",
+          "Vue.js",
+          "HTML",
+          "CSS",
+          "Python"
+        ],
       },
       showAlert: false,
       alertMessage: "",
@@ -248,7 +275,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 @keyframes gradient {
   0% {
     background-position: 0% 50%;
@@ -269,20 +296,20 @@ export default {
 @keyframes pink-glow {
   0% {
     color: #fff;
-    text-shadow: 0 0 5px #ff69b4, 0 0 10px #ff69b4, 0 0 15px #ff69b4,
-      0 0 20px #ff1493, 0 0 35px #ff1493, 0 0 40px #ff1493, 0 0 50px #ff1493;
+    text-shadow: 0 0 10px #ff69b4, 0 0 20px #ff69b4, 0 0 30px #ff69b4,
+      0 0 40px #ff1493, 0 0 50px #ff1493, 0 0 60px #ff1493, 0 0 70px #ff1493;
   }
 
   50% {
     color: #ffe6f2;
-    text-shadow: 0 0 7px #ff69b4, 0 0 12px #ff69b4, 0 0 17px #ff69b4,
-      0 0 22px #ff1493, 0 0 37px #ff1493, 0 0 42px #ff1493, 0 0 52px #ff1493;
+    text-shadow: 0 0 15px #ff69b4, 0 0 25px #ff69b4, 0 0 35px #ff69b4,
+      0 0 45px #ff1493, 0 0 55px #ff1493, 0 0 65px #ff1493, 0 0 75px #ff1493;
   }
 
   100% {
     color: #fff;
-    text-shadow: 0 0 5px #ff69b4, 0 0 10px #ff69b4, 0 0 15px #ff69b4,
-      0 0 20px #ff1493, 0 0 35px #ff1493, 0 0 40px #ff1493, 0 0 50px #ff1493;
+    text-shadow: 0 0 10px #ff69b4, 0 0 20px #ff69b4, 0 0 30px #ff69b4,
+      0 0 40px #ff1493, 0 0 50px #ff1493, 0 0 60px #ff1493, 0 0 70px #ff1493;
   }
 }
 
