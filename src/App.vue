@@ -15,19 +15,6 @@
           </h1>
           <p class="text-lg mb-4">{{ profile.bio }}</p>
           <p class="text-gray-400 text-sm mb-4">{{ profile.note }}</p>
-          <div class="skills-section">
-            <h2 class="text-2xl font-semibold mb-3">Skills : </h2>
-            <div class="flex flex-wrap gap-2">
-              <span
-                v-for="(skill, index) in profile.skills"
-                :key="index"
-                class="px-3 py-1 bg-gray-800 rounded-full text-sm hover:bg-gray-700 transition-colors"
-              >
-                {{ skill }}
-                <br>
-              </span>
-              <br>
-            </div>
           </div>
         </div>
         <div class="flex flex-col gap-4 items-center">
