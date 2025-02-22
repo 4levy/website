@@ -3,6 +3,9 @@ import { Geist, Geist_Mono, Fira_Code } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/context/ThemeContext";
 import LoadingScreen from "@/components/LoadingScreen";
+import AudioPlayer from "@/components/AudioPlayer";
+import DevDetect from "@/components/DevDetect";
+import DevProtect from "@/components/DevProtect";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,29 +25,31 @@ const firaCode = Fira_Code({
 export const metadata: Metadata = {
   title: "/.xyz",
   description: "A 16-year-old discord bot developer",
-  metadataBase: new URL('https://4levy.xyz'),
-  authors: [{ name: '4levy' }],
+  metadataBase: new URL("https://4levy.xyz"),
+  authors: [{ name: "4levy" }],
   openGraph: {
-    title: '.xyz | 4levy',
-    description: 'A 16-year-old discord bot developer',
-    url: 'https://4levy.xyz',
-    siteName: '4levy.xyz',
+    title: ".xyz | 4levy",
+    description: "A 16-year-old discord bot developer",
+    url: "https://4levy.xyz",
+    siteName: "4levy.xyz",
     images: [
       {
-        url: 'https://i.postimg.cc/W3C6JT1w/480370730_611932868431109_2766177650965183363_n.jpg',
+        url: "https://i.postimg.cc/W3C6JT1w/480370730_611932868431109_2766177650965183363_n.jpg",
         width: 1200,
         height: 630,
       },
     ],
-    locale: 'en_US',
-    type: 'website',
+    locale: "en_US",
+    type: "website",
   },
   twitter: {
-    card: 'summary_large_image',
-    title: '.xyz | 4levy',
-    description: 'A 16-year-old discord bot developer',
-    images: ['https://i.postimg.cc/W3C6JT1w/480370730_611932868431109_2766177650965183363_n.jpg'],
-    creator: '@4levyz',
+    card: "summary_large_image",
+    title: ".xyz | 4levy",
+    description: "A 16-year-old discord bot developer",
+    images: [
+      "https://i.postimg.cc/W3C6JT1w/480370730_611932868431109_2766177650965183363_n.jpg",
+    ],
+    creator: "@4levyz",
   },
   robots: {
     index: true,
@@ -52,9 +57,9 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
   },
   icons: {
@@ -82,12 +87,37 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+            (function() {
+              try {
+                const bypass = /./[Symbol.match];
+                const check = function() {
+                  if (bypass !== /./[Symbol.match]) {
+                    window.location.href = '/blocked';
+                  }
+                };
+                setInterval(check, 500);
+                Object.defineProperty(/./, Symbol.match, {
+                  get: () => bypass,
+                  configurable: false,
+                });
+              } catch(e) {}
+            })();
+          `,
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${firaCode.variable} antialiased`}
       >
         <ThemeProvider>
+          <DevProtect />
           <LoadingScreen />
           {children}
+          <AudioPlayer />
         </ThemeProvider>
       </body>
     </html>
