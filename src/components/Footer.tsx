@@ -88,9 +88,19 @@ export default function Footer() {
           )
         )}
 
-        <p className="text-xs text-ice-blue/50">
-          © {new Date().getFullYear()} 4levy.xyz • All rights reserved
-        </p>
+        <div className="flex flex-col items-center gap-2 text-center">
+          <p className="text-xs text-ice-blue/50">
+            © {new Date().getFullYear()} 4levy.xyz • All rights reserved
+          </p>
+          <a
+            href="https://github.com/4levy/website/blob/main/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[10px] text-ice-blue/30 hover:text-ice-blue/50 transition-colors"
+          >
+            Released under the MIT License
+          </a>
+        </div>
       </div>
     </footer>
   );
