@@ -6,6 +6,8 @@ import LoadingScreen from "@/components/LoadingScreen";
 import AudioPlayer from "@/components/AudioPlayer";
 import DevDetect from "@/components/DevDetect";
 import DevProtect from "@/components/DevProtect";
+import { BackgroundProvider } from "@/contexts/BackgroundContext";
+import VersionDisplay from "@/components/VersionDisplay";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -116,8 +118,11 @@ export default function RootLayout({
         <ThemeProvider>
           <DevProtect />
           <LoadingScreen />
-          {children}
-          <AudioPlayer />
+          <BackgroundProvider>
+            <VersionDisplay />
+            {children}
+            <AudioPlayer />
+          </BackgroundProvider>
         </ThemeProvider>
       </body>
     </html>

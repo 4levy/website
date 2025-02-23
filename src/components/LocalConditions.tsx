@@ -1,197 +1,249 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Clock, Calendar } from "./icons";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
-interface WeatherResponse {
+interface WeatherData {
+  location: {
+    name: string;
+    region: string;
+    country: string;
+    lat: number;
+    lon: number;
+    tz_id: string;
+    localtime: string;
+    localtime_epoch: number;
+  };
   current: {
+    last_updated: string;
+    temp_c: number;
     temp_f: number;
+    is_day: number;
     condition: {
       text: string;
+      icon: string;
+      code: number;
     };
-    air_quality: {
-      "us-epa-index": number;
-      pm2_5: number;
-    };
+    wind_mph: number;
+    wind_kph: number;
+    wind_degree: number;
+    wind_dir: string;
+    pressure_mb: number;
+    pressure_in: number;
+    precip_mm: number;
+    precip_in: number;
+    humidity: number;
+    cloud: number;
+    feelslike_c: number;
+    feelslike_f: number;
+    vis_km: number;
+    vis_miles: number;
+    uv: number;
+    gust_mph: number;
+    gust_kph: number;
+    dewpoint_c: number;
+    dewpoint_f: number;
   };
 }
 
-function getAQILabel(aqi: number) {
-  switch (aqi) {
-    case 1:
-      return { text: "Good", color: "text-green-400" };
-    case 2:
-      return { text: "Moderate", color: "text-yellow-400" };
-    case 3:
-      return { text: "Unhealthy for Sensitive", color: "text-orange-400" };
-    case 4:
-      return { text: "Unhealthy", color: "text-red-400" };
-    case 5:
-      return { text: "Very Unhealthy", color: "text-purple-400" };
-    case 6:
-      return { text: "Hazardous", color: "text-rose-600" };
-    default:
-      return { text: "Unknown", color: "text-gray-400" };
-  }
-}
-
 export default function LocalConditions() {
-  const [time, setTime] = useState("");
-  const [date, setDate] = useState("");
-  const [location] = useState("Bangkok, Thailand");
-  const [weather, setWeather] = useState<{
-    temp: number;
-    condition: string;
-  } | null>(null);
-  const [error, setError] = useState(false);
-  const [aqi, setAqi] = useState<{ index: number; pm25: number } | null>(null);
+  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isMetric, setIsMetric] = useState(true);
 
   useEffect(() => {
     const fetchWeather = async () => {
       try {
-        const res = await fetch(
-          `https://api.weatherapi.com/v1/current.json?key=${process.env.NEXT_PUBLIC_WEATHER_API_KEY}&q=Bangkok&aqi=yes`
+        setIsLoading(true);
+        setError(null);
+
+        const response = await fetch(
+          `https://api.weatherapi.com/v1/current.json?key=${process.env.NEXT_PUBLIC_WEATHER_API_KEY}&q=auto:ip&aqi=no`
         );
 
-        if (!res.ok) throw new Error("Weather API error");
-
-        const data: WeatherResponse = await res.json();
-
-        if (data?.current) {
-          setWeather({
-            temp: Math.round(data.current.temp_f),
-            condition: data.current.condition.text,
-          });
-          setAqi({
-            index: data.current.air_quality["us-epa-index"],
-            pm25: Math.round(data.current.air_quality.pm2_5),
-          });
-          setError(false);
+        if (!response.ok) {
+          throw new Error("Failed to fetch weather data");
         }
-      } catch (error) {
-        console.error("Error fetching weather:", error);
-        setError(true);
+
+        const data = await response.json();
+        setWeather(data);
+      } catch (err) {
+        console.error("Weather fetch error:", err);
+        setError("Could not load weather data");
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchWeather();
-    const weatherInterval = setInterval(fetchWeather, 600000);
-
-    const updateDateTime = () => {
-      const now = new Date();
-      const timeOptions: Intl.DateTimeFormatOptions = {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-        timeZone: "Asia/Bangkok",
-      };
-      const dateOptions: Intl.DateTimeFormatOptions = {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        timeZone: "Asia/Bangkok",
-      };
-
-      setTime(now.toLocaleTimeString("en-US", timeOptions));
-      setDate(now.toLocaleDateString("en-US", dateOptions));
-    };
-
-    updateDateTime();
-    const interval = setInterval(updateDateTime, 1000);
-
-    return () => {
-      clearInterval(weatherInterval);
-      clearInterval(interval);
-    };
+    const interval = setInterval(fetchWeather, 300000);
+    return () => clearInterval(interval);
   }, []);
 
-  const aqiInfo = aqi ? getAQILabel(aqi.index) : null;
+  const getUVLevel = (uv: number) => {
+    if (uv <= 2) return { text: "Low", color: "text-green-400" };
+    if (uv <= 5) return { text: "Moderate", color: "text-yellow-400" };
+    if (uv <= 7) return { text: "High", color: "text-orange-400" };
+    return { text: "Very High", color: "text-red-400" };
+  };
+
+  if (isLoading) {
+    return (
+      <div className="glass-card p-6 rounded-lg animate-pulse">
+        <div className="h-6 bg-sky-500/20 rounded w-1/3 mb-4" />
+        <div className="h-4 bg-sky-500/20 rounded w-2/3 mb-2" />
+        <div className="h-4 bg-sky-500/20 rounded w-1/2" />
+      </div>
+    );
+  }
+
+  if (error || !weather) {
+    return (
+      <div className="glass-card p-6 rounded-lg">
+        <p className="text-ice-blue/70 text-center">
+          {error || "No weather data available"}
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="glass-card p-4 rounded-lg space-y-3">
-      <h3 className="text-lg font-semibold text-white mb-4">
-        Local Conditions
-      </h3>
-
-      {/* Weather information */}
-      <div className="flex items-center gap-3 text-ice-blue/70">
-        <svg
-          className="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"
-          />
-        </svg>
-        <span>
-          {error
-            ? "Weather unavailable"
-            : weather
-            ? `${weather.temp}°F • ${weather.condition}`
-            : "Loading weather..."}
-        </span>
-      </div>
-
-      {/* AQI information */}
-      {aqi && (
-        <div className="flex items-center gap-3 text-ice-blue/70">
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <span>
-            AQI: <span className={aqiInfo?.color}>{aqiInfo?.text}</span> •
-            PM2.5: {aqi.pm25}
-          </span>
+    <div className="glass-card p-6 rounded-lg">
+      <div className="flex items-start justify-between mb-6">
+        <div>
+          <h3 className="text-xl font-bold text-white mb-2">
+            Local Conditions
+          </h3>
+          <p className="text-ice-blue/70 text-sm">
+            {weather.location.name}, {weather.location.country}
+          </p>
+          <p className="text-ice-blue/50 text-xs">
+            Last updated:{" "}
+            {new Date(weather.location.localtime).toLocaleTimeString()}
+          </p>
         </div>
-      )}
-
-      <div className="flex items-center gap-3 text-ice-blue/70">
-        <Clock className="w-4 h-4" />
-        <span>{time}</span>
-      </div>
-
-      <div className="flex items-center gap-3 text-ice-blue/70">
-        <Calendar className="w-4 h-4" />
-        <span>{date}</span>
-      </div>
-
-      <div className="flex items-center gap-3 text-ice-blue/70">
-        <svg
-          className="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+        <button
+          onClick={() => setIsMetric(!isMetric)}
+          className="px-3 py-1 text-xs bg-sky-500/20 hover:bg-sky-500/30 
+            text-sky-300 rounded-full transition-colors border border-sky-500/20"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-          />
-        </svg>
-        <span>{location}</span>
+          {isMetric ? "°C" : "°F"}
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div
+          className="col-span-2 flex items-center justify-between p-4 
+          rounded-lg bg-sky-500/5 border border-sky-500/10"
+        >
+          <div className="flex items-center gap-4">
+            <img
+              src={weather.current.condition.icon}
+              alt={weather.current.condition.text}
+              className="w-12 h-12"
+            />
+            <div>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={isMetric ? "C" : "F"}
+                  initial={{ y: 10, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -10, opacity: 0 }}
+                  className="text-2xl font-bold text-white"
+                >
+                  {isMetric
+                    ? `${weather.current.temp_c}°C`
+                    : `${weather.current.temp_f}°F`}
+                </motion.div>
+              </AnimatePresence>
+              <p className="text-sm text-ice-blue/70">
+                {weather.current.condition.text}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <WeatherStat
+          label="Wind"
+          value={`${weather.current.wind_kph} km/h ${weather.current.wind_dir}`}
+          subValue={`Gusts: ${weather.current.gust_kph} km/h`}
+          icon="🌬️"
+        />
+
+        <WeatherStat
+          label="Humidity"
+          value={`${weather.current.humidity}%`}
+          subValue={`Dewpoint: ${
+            isMetric
+              ? `${weather.current.dewpoint_c}°C`
+              : `${weather.current.dewpoint_f}°F`
+          }`}
+          icon="💧"
+        />
+
+        <WeatherStat
+          label="Pressure"
+          value={`${weather.current.pressure_mb} mb`}
+          subValue={`${weather.current.pressure_in} in`}
+          icon="📊"
+        />
+
+        <WeatherStat
+          label="Visibility"
+          value={`${weather.current.vis_km} km`}
+          subValue={`${weather.current.vis_miles} miles`}
+          icon="👁️"
+        />
+
+        <WeatherStat
+          label="UV Index"
+          value={getUVLevel(weather.current.uv).text}
+          valueClassName={getUVLevel(weather.current.uv).color}
+          icon="☀️"
+        />
+
+        <WeatherStat
+          label="Cloud Cover"
+          value={`${weather.current.cloud}%`}
+          icon="☁️"
+        />
+      </div>
+
+      <div className="mt-4 p-3 rounded-lg bg-sky-500/5 border border-sky-500/10">
+        <div className="flex items-center gap-2 text-xs text-ice-blue/50">
+          <span>
+            📍 {weather.location.lat.toFixed(2)}°N,{" "}
+            {weather.location.lon.toFixed(2)}°E
+          </span>
+          <span>|</span>
+          <span>🌍 {weather.location.tz_id}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function WeatherStat({
+  label,
+  value,
+  subValue,
+  icon,
+  valueClassName = "text-sky-300",
+}: {
+  label: string;
+  value: string;
+  subValue?: string;
+  icon: React.ReactNode;
+  valueClassName?: string;
+}) {
+  return (
+    <div className="flex items-center gap-3 p-3 rounded-lg bg-sky-500/5 border border-sky-500/10">
+      <div className="p-2 rounded-full bg-sky-500/10 text-sky-400">{icon}</div>
+      <div>
+        <p className="text-xs text-ice-blue/50">{label}</p>
+        <p className={`text-sm font-medium ${valueClassName}`}>{value}</p>
+        {subValue && <p className="text-xs text-ice-blue/40">{subValue}</p>}
       </div>
     </div>
   );

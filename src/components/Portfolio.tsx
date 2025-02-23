@@ -1,14 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useInView,
+  UseInViewOptions,
+} from "framer-motion"; // Fixed import
 import { PORTFOLIO_ITEMS } from "@/constants/config";
+import { useBackground } from "@/contexts/BackgroundContext";
 
 export default function Portfolio() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const { changeBackground } = useBackground();
+  const ref = useRef(null);
+  const isInView = useInView(ref, {
+    amount: 0.2,
+    once: false,
+  } as UseInViewOptions);
 
-  // Generate consistent petal positions
+  useEffect(() => {
+    if (isInView) {
+      changeBackground("/videos/Background2.mp4");
+    } else {
+      changeBackground("/videos/background.mp4");
+    }
+  }, [isInView, changeBackground]);
+
   const petals = Array.from({ length: 20 }, (_, i) => ({
     id: i,
     left: `${(i * 5.27) % 100}%`,
@@ -19,12 +38,13 @@ export default function Portfolio() {
 
   return (
     <motion.section
+      ref={ref}
       className="py-20 relative overflow-hidden"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
     >
-      {/* Sakura petals background */}
+
       <div className="absolute inset-0 pointer-events-none">
         {petals.map((petal) => (
           <motion.div
@@ -47,7 +67,6 @@ export default function Portfolio() {
         ))}
       </div>
 
-      {/* Section header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -59,7 +78,6 @@ export default function Portfolio() {
         <div className="h-px flex-1 bg-gradient-to-r from-pink-400/20 to-transparent" />
       </motion.div>
 
-      {/* Portfolio grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {PORTFOLIO_ITEMS.map((item, index) => (
           <motion.div
