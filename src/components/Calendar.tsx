@@ -4,46 +4,44 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 
 export default function Calendar() {
-  // Use a ref to store the current date to avoid re-renders
-  const dateRef = useRef(new Date());
+  // Function to get current Thailand time
+  const getThailandTime = () => {
+    const now = new Date();
+    return new Date(now.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
+  };
+
+  const dateRef = useRef(getThailandTime());
   const [date, setDate] = useState(() => dateRef.current);
   const [selectedDate, setSelectedDate] = useState(
     () => new Date(dateRef.current)
   );
   const [daysUntilBirthday, setDaysUntilBirthday] = useState<number>(0);
 
-  // Improved sync function
   const syncDateTime = useCallback(() => {
-    const now = new Date();
-    dateRef.current = now;
+    const thaiTime = getThailandTime();
+    dateRef.current = thaiTime;
 
-    // Force a fresh date object creation to trigger re-render
-    setDate(new Date(now));
+    setDate(new Date(thaiTime));
     setSelectedDate((prev) => {
-      const updated = new Date(now);
-      // Preserve the selected month/year while updating the current date
+      const updated = new Date(thaiTime);
       updated.setFullYear(prev.getFullYear());
       updated.setMonth(prev.getMonth());
       return updated;
     });
   }, []);
 
-  // Single source of truth for date updates
   useEffect(() => {
-    // Immediate sync
     syncDateTime();
 
-    // Minute updates
     const minuteInterval = setInterval(syncDateTime, 60000);
 
-    // Precise midnight update
     const scheduleMidnightUpdate = () => {
-      const now = new Date();
-      const tomorrow = new Date(now);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(0, 0, 0, 0);
+      const thaiTime = getThailandTime();
+      const tomorrowThai = new Date(thaiTime);
+      tomorrowThai.setDate(tomorrowThai.getDate() + 1);
+      tomorrowThai.setHours(0, 0, 0, 0);
 
-      const timeUntilMidnight = tomorrow.getTime() - now.getTime();
+      const timeUntilMidnight = tomorrowThai.getTime() - thaiTime.getTime();
       return setTimeout(() => {
         syncDateTime();
         midnightTimeout = scheduleMidnightUpdate();
@@ -77,7 +75,7 @@ export default function Calendar() {
 
   useEffect(() => {
     const calculateDaysUntilBirthday = () => {
-      const now = new Date();
+      const now = getThailandTime();
       const currentYear = now.getFullYear();
       const birthday = new Date(currentYear, 3, 7); // April 7th (month is 0-based)
 
