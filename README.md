@@ -20,6 +20,15 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Video Assets
+
+Place video files in the `/public/videos/` directory:
+
+- background.mp4
+- Background2.mp4
+
+These files must be present for the background effects to work correctly in both development and production.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

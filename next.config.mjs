@@ -57,16 +57,37 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   assetPrefix: process.env.NODE_ENV === "production" ? "/_next" : "",
+  headers: async () => {
+    return [
+      {
+        source: "/videos/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
+  },
   webpack: (config) => {
     config.module.rules.push({
       test: /\.(mp4|webm)$/i,
-      type: "asset/resource",
-      generator: {
-        filename: "static/media/[name][ext]",
-      },
+      use: [
+        {
+          loader: "file-loader",
+          options: {
+            name: "[name].[hash].[ext]",
+            outputPath: "static/media/",
+            publicPath: "/_next/static/media/",
+          },
+        },
+      ],
     });
     return config;
   },
+  output: "standalone",
+  staticPageGenerationTimeout: 300,
 };
 
 export default nextConfig;

@@ -8,6 +8,7 @@ import DevDetect from "@/components/DevDetect";
 import DevProtect from "@/components/DevProtect";
 import { BackgroundProvider } from "@/contexts/BackgroundContext";
 import VersionDisplay from "@/components/VersionDisplay";
+import VideoPreloader from "@/components/VideoPreloader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -116,6 +117,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${firaCode.variable} antialiased`}
       >
         <ThemeProvider>
+          <VideoPreloader />
           <DevProtect />
           <LoadingScreen />
           <BackgroundProvider>

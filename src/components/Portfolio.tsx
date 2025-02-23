@@ -7,9 +7,9 @@ import {
   AnimatePresence,
   useInView,
   UseInViewOptions,
-} from "framer-motion"; // Fixed import
+} from "framer-motion";
 import { PORTFOLIO_ITEMS } from "@/constants/config";
-import { useBackground } from "@/contexts/BackgroundContext";
+import { useBackground } from "@/contexts/BackgroundContext"; // Fixed import syntax
 import { getVideoPath } from "@/utils/assetHelpers";
 
 export default function Portfolio() {
@@ -22,10 +22,16 @@ export default function Portfolio() {
   } as UseInViewOptions);
 
   useEffect(() => {
+    // Add console.log to debug visibility state
+    console.log("Portfolio in view:", isInView);
+
     if (isInView) {
-      changeBackground(getVideoPath("Background2.mp4"));
+      // Use the full path and add timestamp to bust cache
+      const timestamp = Date.now();
+      changeBackground(`/videos/Background2.mp4?t=${timestamp}`);
     } else {
-      changeBackground(getVideoPath("background.mp4"));
+      const timestamp = Date.now();
+      changeBackground(`/videos/background.mp4?t=${timestamp}`);
     }
   }, [isInView, changeBackground]);
 
