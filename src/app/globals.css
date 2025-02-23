@@ -115,18 +115,15 @@
   height: 24px;
 }
 
-/* Remove scrollbars but keep functionality */
 * {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
 }
 
-/* Chrome, Safari, Opera */
 *::-webkit-scrollbar {
   display: none;
 }
 
-/* Optional: If you want to keep scrollbar functionality for specific elements, add this class */
 .show-scrollbar {
   scrollbar-width: auto !important;
   -ms-overflow-style: auto !important;

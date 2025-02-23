@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 
 export default function AudioPlayer() {
-  // Initialize states without accessing window/localStorage
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.2);
   const [currentTime, setCurrentTime] = useState(0);
@@ -14,9 +13,8 @@ export default function AudioPlayer() {
   const hasInitialized = useRef(false);
   const loadAttemptRef = useRef<number>(0);
 
-  // Move localStorage checks to useEffect
   useEffect(() => {
-    // Initialize states from localStorage after mount
+
     const storedVolume = localStorage.getItem('audioVolume');
     const storedVisibility = localStorage.getItem('playerVisible');
     
@@ -167,7 +165,6 @@ export default function AudioPlayer() {
 
   return (
     <>
-      {/* Show/Hide Button */}
       <button
         onClick={toggleVisibility}
         className="fixed bottom-8 right-8 z-50 w-8 h-8 flex items-center justify-center 
@@ -189,7 +186,6 @@ export default function AudioPlayer() {
         </svg>
       </button>
 
-      {/* Player UI */}
       {isVisible && (
         <div className="fixed bottom-20 right-8 z-50">
           <div className="glass-card p-4 rounded-xl flex flex-col gap-3 min-w-[300px]
@@ -294,7 +290,6 @@ export default function AudioPlayer() {
         </div>
       )}
 
-      {/* Keep audio element outside visibility check */}
       <audio
         ref={audioRef}
         preload="auto"
