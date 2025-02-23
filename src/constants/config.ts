@@ -33,7 +33,9 @@ export const DEVELOPERS: Developer[] = [
     name: "4levy",
     discordId: "874898422233178142",
     role: "Self taught developer | Student",
-    description: ["A <PreciseAge/>-year-old Discord bot developer.\n\nFreelancer."],
+    description: [
+      "A <PreciseAge/>-year-old Discord bot developer.\n\nFreelancer.",
+    ],
     avatar: "/images/avatar.png",
     status: "online",
     socials: {

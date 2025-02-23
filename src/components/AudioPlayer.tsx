@@ -2,7 +2,21 @@
 
 import { useState, useEffect, useRef } from "react";
 
+const PLAYLIST = [
+  {
+    title: "aishiterukarasa",
+    artist: "itoguruma",
+    src: "/music/Background.mp3",
+  },
+  {
+    title: "Limerence (feat. Lilycat)",
+    artist: "angelize, Lilycat",
+    src: "/music/Limerence.mp3",
+  },
+];
+
 export default function AudioPlayer() {
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.2);
   const [currentTime, setCurrentTime] = useState(0);
@@ -12,27 +26,61 @@ export default function AudioPlayer() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hasInitialized = useRef(false);
   const loadAttemptRef = useRef<number>(0);
+  const hasInteracted = useRef(false);
 
   useEffect(() => {
+    const savedState = localStorage.getItem("audioPlayerState");
+    if (savedState) {
+      const { trackIndex, wasPlaying, lastTime, lastVolume, wasVisible } =
+        JSON.parse(savedState);
 
-    const storedVolume = localStorage.getItem('audioVolume');
-    const storedVisibility = localStorage.getItem('playerVisible');
-    
-    if (storedVolume) {
-      setVolume(parseFloat(storedVolume));
+      setCurrentTrackIndex(trackIndex || 0);
+      setVolume(lastVolume || 0.2);
+      setCurrentTime(lastTime || 0);
+      setIsVisible(wasVisible ?? true);
+
+      if (wasPlaying && hasInteracted.current) {
+        setIsPlaying(true);
+      }
     }
-    if (storedVisibility === 'false') {
-      setIsVisible(false);
-    }
+
+    const handleInteraction = () => {
+      hasInteracted.current = true;
+      window.removeEventListener("click", handleInteraction);
+    };
+    window.addEventListener("click", handleInteraction);
+
+    return () => window.removeEventListener("click", handleInteraction);
   }, []);
+
+  useEffect(() => {
+    const saveState = () => {
+      const state = {
+        trackIndex: currentTrackIndex,
+        wasPlaying: isPlaying,
+        lastTime: audioRef.current?.currentTime || 0,
+        lastVolume: volume,
+        wasVisible: isVisible,
+      };
+      localStorage.setItem("audioPlayerState", JSON.stringify(state));
+    };
+
+    const intervalId = setInterval(saveState, 1000);
+
+    window.addEventListener("beforeunload", saveState);
+
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener("beforeunload", saveState);
+    };
+  }, [currentTrackIndex, isPlaying, volume, isVisible]);
 
   const initializeAudio = async () => {
     if (!audioRef.current) return;
 
     try {
       setIsLoading(true);
-      audioRef.current.src = "/music/Background.mp3";
-      audioRef.current.loop = true;
+      audioRef.current.src = PLAYLIST[currentTrackIndex].src;
       audioRef.current.volume = volume;
 
       await new Promise((resolve, reject) => {
@@ -40,18 +88,20 @@ export default function AudioPlayer() {
         audioRef.current!.onerror = reject;
       });
 
-      const storedTime = localStorage.getItem("audioTime");
-      if (storedTime) {
-        audioRef.current.currentTime = parseFloat(storedTime);
+      const savedState = localStorage.getItem("audioPlayerState");
+      if (savedState) {
+        const { lastTime } = JSON.parse(savedState);
+        if (lastTime) {
+          audioRef.current.currentTime = lastTime;
+        }
       }
 
       setIsLoading(false);
 
-      if (localStorage.getItem("audioPlaying") === "true") {
+      if (isPlaying && hasInteracted.current) {
         const playPromise = audioRef.current.play();
         if (playPromise) {
           await playPromise;
-          setIsPlaying(true);
         }
       }
     } catch (error) {
@@ -122,8 +172,24 @@ export default function AudioPlayer() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('playerVisible', isVisible.toString());
+    localStorage.setItem("playerVisible", isVisible.toString());
   }, [isVisible]);
+
+  useEffect(() => {
+    initializeAudio();
+  }, [currentTrackIndex]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleEnded = () => {
+      playNextTrack();
+    };
+
+    audio.addEventListener("ended", handleEnded);
+    return () => audio.removeEventListener("ended", handleEnded);
+  }, []);
 
   const handleTimeUpdate = () => {
     if (audioRef.current) {
@@ -149,18 +215,30 @@ export default function AudioPlayer() {
     try {
       if (isPlaying) {
         audioRef.current.pause();
+        setIsPlaying(false);
       } else {
+        hasInteracted.current = true;
         await audioRef.current.play();
+        setIsPlaying(true);
       }
-      setIsPlaying(!isPlaying);
-      localStorage.setItem("audioPlaying", (!isPlaying).toString());
     } catch (error) {
       console.error("Playback error:", error);
+      setIsPlaying(false);
     }
   };
 
   const toggleVisibility = () => {
     setIsVisible(!isVisible);
+  };
+
+  const playNextTrack = () => {
+    setCurrentTrackIndex((prev) => (prev + 1) % PLAYLIST.length);
+  };
+
+  const playPreviousTrack = () => {
+    setCurrentTrackIndex(
+      (prev) => (prev - 1 + PLAYLIST.length) % PLAYLIST.length
+    );
   };
 
   return (
@@ -171,16 +249,22 @@ export default function AudioPlayer() {
           rounded-full bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 transition-all
           hover:scale-105 active:scale-95 hover:shadow-lg hover:shadow-sky-500/10"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth={2} 
-            d={isVisible 
-              ? "M19 9l-7 7-7-7"
-              : (isPlaying 
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d={
+              isVisible
+                ? "M19 9l-7 7-7-7"
+                : isPlaying
                 ? "M9 11l3 3 3-3m-3-3v6"
-                : "M15 12a3 3 0 11-6 0 3 3 0 016 0z")
+                : "M15 12a3 3 0 11-6 0 3 3 0 016 0z"
             }
           />
         </svg>
@@ -188,8 +272,10 @@ export default function AudioPlayer() {
 
       {isVisible && (
         <div className="fixed bottom-20 right-8 z-50">
-          <div className="glass-card p-4 rounded-xl flex flex-col gap-3 min-w-[300px]
-            shadow-lg shadow-sky-500/10 border border-sky-500/20">
+          <div
+            className="glass-card p-4 rounded-xl flex flex-col gap-3 min-w-[300px]
+            shadow-lg shadow-sky-500/10 border border-sky-500/20"
+          >
             <div className="flex items-center justify-between mb-1">
               <span className="text-sm font-medium text-sky-300 flex items-center gap-2">
                 {isLoading ? (
@@ -209,10 +295,26 @@ export default function AudioPlayer() {
                   </>
                 )}
               </span>
-              <span className="text-xs text-ice-blue/50">aishiterukarasa</span>
+              <span className="text-xs text-ice-blue/50">
+                {PLAYLIST[currentTrackIndex].artist}
+              </span>
             </div>
 
             <div className="flex items-center gap-4">
+              {/* Add previous track button */}
+              <button
+                onClick={playPreviousTrack}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 transition-all"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
+                </svg>
+              </button>
+
               <button
                 onClick={togglePlay}
                 className="w-10 h-10 flex items-center justify-center rounded-full 
@@ -220,14 +322,36 @@ export default function AudioPlayer() {
                   hover:scale-105 active:scale-95 hover:shadow-lg hover:shadow-sky-500/20"
               >
                 {isPlaying ? (
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
                   </svg>
                 ) : (
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 24 24">
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 24 24"
+                  >
                     <path d="M8 5v14l11-7z" />
                   </svg>
                 )}
+              </button>
+
+              {/* Add next track button */}
+              <button
+                onClick={playNextTrack}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 transition-all"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+                </svg>
               </button>
 
               <div className="flex-1 space-y-1">
@@ -285,6 +409,27 @@ export default function AudioPlayer() {
                   [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sky-400
                   hover:[&::-webkit-slider-thumb]:bg-sky-300"
               />
+            </div>
+
+            <div className="mt-2 pt-2 border-t border-sky-500/10">
+              <div className="text-xs font-medium text-ice-blue/50 mb-2">
+                Playlist
+              </div>
+              <div className="space-y-1 max-h-32 overflow-y-auto">
+                {PLAYLIST.map((track, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentTrackIndex(index)}
+                    className={`w-full text-left px-2 py-1 rounded text-xs hover:bg-sky-500/10 transition-colors ${
+                      currentTrackIndex === index
+                        ? "text-sky-300 bg-sky-500/5"
+                        : "text-ice-blue/70"
+                    }`}
+                  >
+                    {track.title}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>

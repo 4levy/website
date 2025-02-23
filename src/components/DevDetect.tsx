@@ -58,15 +58,12 @@ export default function DevDetect() {
       });
     }
 
-    // Add event listeners
     window.addEventListener("contextmenu", handleContextMenu);
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("resize", detectDevTools);
 
-    // Check periodically
     const interval = setInterval(detectDevTools, 1000);
 
-    // Cleanup
     return () => {
       window.removeEventListener("contextmenu", handleContextMenu);
       window.removeEventListener("keydown", handleKeyDown);

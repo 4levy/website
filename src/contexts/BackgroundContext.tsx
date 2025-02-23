@@ -116,14 +116,18 @@ export function BackgroundProvider({
             muted
             loop
             playsInline
-            className="absolute w-full h-full object-cover transition-opacity duration-1000"
+            disablePictureInPicture
+            controlsList="nodownload noplaybackrate nopictureinpicture"
+            className="absolute w-full h-full object-cover transition-opacity duration-1000 
+              [&::-webkit-media-controls]:hidden 
+              [&::-webkit-media-controls-panel]:hidden 
+              [&::-webkit-media-controls-play-button]:hidden
+              [&::-webkit-media-controls-picture-in-picture-button]:hidden"
             style={{
               opacity: isVideoLoaded ? 0.5 : 0,
               pointerEvents: "none",
-            }}
-            onError={(e) => {
-              console.error("Video loading error:", e);
-              setHasError(true);
+              WebkitUserSelect: "none",
+              userSelect: "none",
             }}
           >
             <source src={currentVideo} type="video/mp4" />
