@@ -17,9 +17,22 @@ const techStack = [
 ];
 
 export default function SkillsSection({ skills }: { skills: Skill[] }) {
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "mastered":
+        return "bg-green-500/20 text-green-400 border-green-500/30";
+      case "experienced":
+        return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+      case "learning":
+        return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+      default:
+        return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+    }
+  };
+
   return (
-    <div className="mt-6 space-y-6">
-      <div className="grid grid-cols-2 gap-4">
+    <div className="mt-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {skills.map((skill, i) => (
           <motion.div
             key={skill.name}
@@ -28,27 +41,21 @@ export default function SkillsSection({ skills }: { skills: Skill[] }) {
             transition={{ delay: i * 0.1 }}
             className="glass-card p-4 rounded-lg"
           >
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-xl">{skill.icon}</span>
-              <span className="text-sm font-medium text-ice-blue/70">
-                {skill.name}
-              </span>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">{skill.icon}</span>
+                <span className="text-sm font-medium text-ice-blue/70">
+                  {skill.name}
+                </span>
+              </div>
               <span
-                className={`text-xs px-2 py-0.5 rounded-full ml-auto
-                ${
-                  skill.status === "mastered"
-                    ? "bg-green-500/20 text-green-400"
-                    : skill.status === "experienced"
-                    ? "bg-blue-500/20 text-blue-400"
-                    : skill.status === "learning"
-                    ? "bg-yellow-500/20 text-yellow-400"
-                    : "bg-gray-500/20 text-gray-400"
-                }`}
+                className={`text-xs px-2 py-1 rounded-full sm:ml-auto 
+                w-fit border ${getStatusColor(skill.status)}`}
               >
                 {skill.status}
               </span>
             </div>
-            <div className="h-1 bg-sky-500/20 rounded-full overflow-hidden">
+            <div className="h-1 bg-sky-500/20 rounded-full overflow-hidden mt-2">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${skill.level}%` }}
