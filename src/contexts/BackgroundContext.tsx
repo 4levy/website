@@ -17,11 +17,20 @@ export function BackgroundProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [currentVideo, setCurrentVideo] = useState("/videos/background.mp4");
+  const [currentVideo, setCurrentVideo] = useState("/_next/static/media/background.mp4");
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const isFirstRender = useRef(true);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  const changeBackground = (video: string) => {
+    isFirstRender.current = false;
+    // Add _next prefix in production for video paths
+    const videoPath = process.env.NODE_ENV === 'production' 
+      ? `/_next/static/media/${video.split('/').pop()}`
+      : video;
+    setCurrentVideo(videoPath);
+  };
 
   useEffect(() => {
     const videoElement = videoRef.current;
@@ -52,7 +61,7 @@ export function BackgroundProvider({
 
   return (
     <BackgroundContext.Provider
-      value={{ currentVideo, changeBackground: setCurrentVideo }}
+      value={{ currentVideo, changeBackground }}
     >
       <div className="fixed inset-0 -z-10 overflow-hidden">
         {/* Fallback background */}

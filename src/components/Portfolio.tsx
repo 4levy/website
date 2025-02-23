@@ -10,6 +10,7 @@ import {
 } from "framer-motion"; // Fixed import
 import { PORTFOLIO_ITEMS } from "@/constants/config";
 import { useBackground } from "@/contexts/BackgroundContext";
+import { getVideoPath } from "@/utils/assetHelpers";
 
 export default function Portfolio() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -22,9 +23,9 @@ export default function Portfolio() {
 
   useEffect(() => {
     if (isInView) {
-      changeBackground("/videos/Background2.mp4");
+      changeBackground(getVideoPath("Background2.mp4"));
     } else {
-      changeBackground("/videos/background.mp4");
+      changeBackground(getVideoPath("background.mp4"));
     }
   }, [isInView, changeBackground]);
 
@@ -44,7 +45,6 @@ export default function Portfolio() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
     >
-
       <div className="absolute inset-0 pointer-events-none">
         {petals.map((petal) => (
           <motion.div
