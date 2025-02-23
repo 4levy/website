@@ -4,18 +4,41 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 export default function Calendar() {
-  const [currentDate] = useState(new Date());
+  const [date, setDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [daysUntilBirthday, setDaysUntilBirthday] = useState<number>(0);
 
-  // Add birthday countdown calculation
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const now = new Date();
+      setDate(now);
+    }, 60000); 
+
+    const calculateNextMidnight = () => {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
+      return tomorrow.getTime() - Date.now();
+    };
+
+    const midnightTimeout = setTimeout(() => {
+      setDate(new Date());
+      const nextMidnight = calculateNextMidnight();
+      setTimeout(() => setDate(new Date()), nextMidnight);
+    }, calculateNextMidnight());
+
+    return () => {
+      clearInterval(intervalId);
+      clearTimeout(midnightTimeout);
+    };
+  }, []);
+
   useEffect(() => {
     const calculateDaysUntilBirthday = () => {
       const now = new Date();
       const currentYear = now.getFullYear();
       const birthday = new Date(currentYear, 3, 7); // April 7th (month is 0-based)
 
-      // If birthday has passed this year, look at next year
       if (now > birthday) {
         birthday.setFullYear(currentYear + 1);
       }
@@ -26,7 +49,7 @@ export default function Calendar() {
     };
 
     calculateDaysUntilBirthday();
-    const interval = setInterval(calculateDaysUntilBirthday, 1000 * 60); // Update every minute
+    const interval = setInterval(calculateDaysUntilBirthday, 1000 * 60);
 
     return () => clearInterval(interval);
   }, []);
@@ -123,9 +146,9 @@ export default function Calendar() {
           ))}
         {days.map((day) => {
           const isToday =
-            day === currentDate.getDate() &&
-            selectedDate.getMonth() === currentDate.getMonth() &&
-            selectedDate.getFullYear() === currentDate.getFullYear();
+            day === date.getDate() &&
+            selectedDate.getMonth() === date.getMonth() &&
+            selectedDate.getFullYear() === date.getFullYear();
 
           const birthday = isBirthday(day);
 
