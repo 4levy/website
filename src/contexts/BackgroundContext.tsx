@@ -23,63 +23,58 @@ export function BackgroundProvider({
   const isFirstRender = useRef(true);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const changeBackground = (video: string) => {
-    isFirstRender.current = false;
-    setCurrentVideo(video);
-  };
-
   useEffect(() => {
-    // Preload the video
-    const video = videoRef.current;
-    if (video) {
-      video.load();
-    }
+    const videoElement = videoRef.current;
+    if (!videoElement) return;
+
+    const handleCanPlay = () => {
+      setIsVideoLoaded(true);
+      setHasError(false);
+    };
+
+    const handleError = () => {
+      console.error("Video failed to load:", currentVideo);
+      setHasError(true);
+      setIsVideoLoaded(false);
+    };
+
+    videoElement.addEventListener("canplay", handleCanPlay);
+    videoElement.addEventListener("error", handleError);
+
+    // Force reload the video
+    videoElement.load();
+
+    return () => {
+      videoElement.removeEventListener("canplay", handleCanPlay);
+      videoElement.removeEventListener("error", handleError);
+    };
   }, [currentVideo]);
 
-  const handleVideoError = () => {
-    console.error("Video failed to load:", currentVideo);
-    setHasError(true);
-  };
-
   return (
-    <BackgroundContext.Provider value={{ currentVideo, changeBackground }}>
+    <BackgroundContext.Provider
+      value={{ currentVideo, changeBackground: setCurrentVideo }}
+    >
       <div className="fixed inset-0 -z-10 overflow-hidden">
-        {/* Fallback gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-midnight via-deep-navy to-midnight" />
+        {/* Fallback background */}
+        <div
+          className="absolute inset-0 bg-gradient-to-b from-midnight via-deep-navy to-midnight opacity-100 transition-opacity duration-1000"
+          style={{ opacity: isVideoLoaded ? 0 : 1 }}
+        />
 
-        <AnimatePresence mode="wait">
-          {!hasError && (
-            <motion.video
-              ref={videoRef}
-              key={currentVideo}
-              initial={
-                isFirstRender.current ? { opacity: 0.5 } : { opacity: 0 }
-              }
-              animate={{ opacity: isVideoLoaded ? 0.5 : 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: isFirstRender.current ? 0 : 1 }}
-              autoPlay
-              muted
-              loop
-              playsInline
-              onLoadedData={() => setIsVideoLoaded(true)}
-              onError={handleVideoError}
-              disablePictureInPicture
-              disableRemotePlayback
-              controlsList="nodownload noplaybackrate nopictureinpicture"
-              className="absolute w-full h-full object-cover [&::-webkit-media-controls-panel]:hidden 
-                [&::-webkit-media-controls]:hidden [&::-webkit-media-controls-play-button]:hidden"
-              style={{
-                pointerEvents: "none",
-                WebkitUserSelect: "none",
-                msUserSelect: "none",
-                userSelect: "none",
-              }}
-            >
-              <source src={currentVideo} type="video/mp4" />
-            </motion.video>
-          )}
-        </AnimatePresence>
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute w-full h-full object-cover transition-opacity duration-1000"
+          style={{
+            opacity: isVideoLoaded ? 0.5 : 0,
+            pointerEvents: "none",
+          }}
+        >
+          <source src={currentVideo} type="video/mp4" />
+        </video>
       </div>
       {children}
     </BackgroundContext.Provider>
