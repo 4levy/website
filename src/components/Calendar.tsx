@@ -1,19 +1,32 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 
 export default function Calendar() {
-  const [date, setDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [date, setDate] = useState(() => new Date()); // Initialize with current date
+  const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [daysUntilBirthday, setDaysUntilBirthday] = useState<number>(0);
 
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      const now = new Date();
-      setDate(now);
-    }, 60000); 
+  // Add function to sync date across component
+  const syncDateTime = useCallback(() => {
+    const now = new Date();
+    setDate(now);
+    setSelectedDate((prev) => {
+      const updated = new Date(now);
+      updated.setMonth(prev.getMonth(), prev.getDate());
+      return updated;
+    });
+  }, []);
 
+  useEffect(() => {
+    // Initial sync
+    syncDateTime();
+
+    // Update every minute
+    const minuteInterval = setInterval(syncDateTime, 60000);
+
+    // Calculate time until next midnight
     const calculateNextMidnight = () => {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
@@ -21,17 +34,31 @@ export default function Calendar() {
       return tomorrow.getTime() - Date.now();
     };
 
-    const midnightTimeout = setTimeout(() => {
-      setDate(new Date());
-      const nextMidnight = calculateNextMidnight();
-      setTimeout(() => setDate(new Date()), nextMidnight);
-    }, calculateNextMidnight());
+    // Set up midnight update
+    const scheduleNextMidnight = () => {
+      const timeUntilMidnight = calculateNextMidnight();
+      return setTimeout(() => {
+        syncDateTime();
+        midnightTimeout = scheduleNextMidnight();
+      }, timeUntilMidnight);
+    };
+
+    let midnightTimeout = scheduleNextMidnight();
+
+    // Sync on visibility change
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        syncDateTime();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      clearInterval(intervalId);
+      clearInterval(minuteInterval);
       clearTimeout(midnightTimeout);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, []);
+  }, [syncDateTime]);
 
   useEffect(() => {
     const calculateDaysUntilBirthday = () => {
