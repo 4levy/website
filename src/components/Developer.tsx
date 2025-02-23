@@ -5,6 +5,21 @@ import Image from "next/image";
 import type { LanyardData, Developer } from "@/types/lanyard";
 import { ActivityIcon } from "./ActivityIcon";
 import SkillsSection from "./SkillsSection";
+import PreciseAge from "./PreciseAge";
+
+const renderDescription = (text: string): React.ReactNode => {
+  if (text.includes("<PreciseAge/>")) {
+    const parts = text.split("<PreciseAge/>");
+    return (
+      <>
+        {parts[0]}
+        <PreciseAge />
+        {parts[1]}
+      </>
+    );
+  }
+  return text;
+};
 
 export default function DeveloperCard({ developer }: { developer: Developer }) {
   const [data, setData] = useState<LanyardData | null>(null);
@@ -137,7 +152,13 @@ export default function DeveloperCard({ developer }: { developer: Developer }) {
             </div>
           </div>
           <div className="whitespace-pre-line text-ice-blue/70 text-sm mb-6 leading-relaxed">
-            {developer.description}
+            <div className="space-y-4">
+              {developer.description.map((text, index) => (
+                <p key={index} className="text-ice-blue/70">
+                  {renderDescription(text)}
+                </p>
+              ))}
+            </div>
           </div>
           {data.activities && data.activities.length > 0 && (
             <div className="space-y-3 mt-4">

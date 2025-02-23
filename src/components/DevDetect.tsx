@@ -30,7 +30,6 @@ export default function DevDetect() {
       }
     };
 
-    // Check for dev tools
     const detectDevTools = () => {
       const threshold = 160;
       const widthThreshold = window.outerWidth - window.innerWidth > threshold;
@@ -43,7 +42,6 @@ export default function DevDetect() {
       }
     };
 
-    // Disable console in production with proper typing
     if (process.env.NODE_ENV === "production") {
       const noop = () => undefined;
       const methods: ConsoleMethod[] = [

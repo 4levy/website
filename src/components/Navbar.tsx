@@ -9,6 +9,7 @@ const navItems = [
   { name: "Home", path: "#" },
   { name: "About", path: "#about" },
   { name: "Work", path: "#work" },
+  { name: "Portfolio", path: "#portfolio" }, // Added new nav item
 ];
 
 export default function Navbar() {
@@ -20,7 +21,7 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ["about", "work"];
+      const sections = ["about", "work", "portfolio"];
       const current = sections.find((section) => {
         const element = document.getElementById(section);
         if (element) {
@@ -137,7 +138,7 @@ export default function Navbar() {
               className="absolute top-full left-0 right-0 bg-slate-900/90 backdrop-blur-lg border-b border-sky-500/10"
             >
               <div className="p-4 flex flex-col gap-4">
-                {["Home", "About", "Work"].map((item) => (
+                {["Home", "About", "Work", "Portfolio"].map((item) => (
                   <a
                     key={item}
                     href={`#${item.toLowerCase()}`}

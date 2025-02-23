@@ -28,17 +28,21 @@ export type SkillStatus = "mastered" | "learning" | "experienced" | "beginner";
 export interface Skill {
   name: string;
   icon: string;
-  level: number; // 1-100
+  level: number; 
   color: string;
   status: SkillStatus;
 }
 
 export interface Developer {
   name: string;
-  discordId: string;
   role: string;
-  description: string;
-  skills: Skill[]; // Changed from string[] to Skill[]
-  birthDate?: string;
-  github?: string; // Add this line
+  description: string[];
+  avatar: string;
+  discordId: string;
+  status: "online" | "idle" | "dnd" | "offline";
+  socials: {
+    github: string;
+    twitter: string;
+  };
+  skills: Skill[];
 }

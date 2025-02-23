@@ -32,9 +32,14 @@ export const DEVELOPERS: Developer[] = [
   {
     name: "4levy",
     discordId: "874898422233178142",
-    role: "Meow!!",
-    github: "4levy",
-    description: `A 16-year-old discord bot developer..! na meow`,
+    role: "Self taught developer | Student",
+    description: ["A <PreciseAge/>-year-old Discord bot developer."],
+    avatar: "/images/avatar.png",
+    status: "online",
+    socials: {
+      github: "https://github.com/4levy",
+      twitter: "https://twitter.com/4levyz",
+    },
     skills: [
       {
         name: "JavaScript",
@@ -107,5 +112,20 @@ export const DEVELOPERS: Developer[] = [
         status: "mastered",
       },
     ],
+  },
+];
+
+export const PORTFOLIO_ITEMS = [
+  {
+    title: "Coming soon",
+    description: "////////////////////////",
+    image: "https://i.postimg.cc/vTkW3mYT/2acf1a7c694b96705a42ee054ab9c69f.jpg",
+    tags: ["...."],
+  },
+  {
+    title: "Coming soon",
+    description: "////////////////////////",
+    image: "https://i.postimg.cc/vTkW3mYT/2acf1a7c694b96705a42ee054ab9c69f.jpg",
+    tags: ["Next.js"],
   },
 ];

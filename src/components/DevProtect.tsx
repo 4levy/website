@@ -33,7 +33,7 @@ export default function DevProtect() {
           checksRef.current = 0;
         }
       } catch (error) {
-        // Ignore errors
+
       }
     };
 

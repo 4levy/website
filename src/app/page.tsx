@@ -13,6 +13,9 @@ import ThemeToggle from "@/components/ThemeToggle";
 import LocalConditions from "@/components/LocalConditions";
 import RandomImage from "@/components/RandomImage";
 import Footer from "@/components/Footer";
+import PreciseAge from "@/components/PreciseAge";
+import Portfolio from "@/components/Portfolio";
+import Calendar from "@/components/Calendar";
 
 function ProjectsSkeleton() {
   return (
@@ -94,6 +97,7 @@ function DeveloperSection() {
               <DeveloperCard key={developer.discordId} developer={developer} />
             ))}
             <LocalConditions />
+            <Calendar />
             <RandomImage />
             <ContactSection />
           </div>
@@ -116,7 +120,7 @@ export default function Home() {
         <div className="text-center">
           <h1 className="hero-title gradient-text mb-6">4levy.xyz</h1>
           <p className="text-lg md:text-xl text-ice-blue/70 max-w-2xl mx-auto text-glow">
-            ehhh i will put something here later..
+            I will add something here later..
           </p>
         </div>
       </section>
@@ -136,6 +140,10 @@ export default function Home() {
       <Suspense fallback={<div>Loading about...</div>}>
         <DeveloperSection />
       </Suspense>
+
+      <section id="portfolio" className="py-20">
+        <Portfolio />
+      </section>
 
       <Footer />
     </main>
