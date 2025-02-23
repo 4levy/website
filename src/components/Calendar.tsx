@@ -1,62 +1,77 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 
 export default function Calendar() {
-  const [date, setDate] = useState(() => new Date()); // Initialize with current date
-  const [selectedDate, setSelectedDate] = useState(() => new Date());
+  // Use a ref to store the current date to avoid re-renders
+  const dateRef = useRef(new Date());
+  const [date, setDate] = useState(() => dateRef.current);
+  const [selectedDate, setSelectedDate] = useState(
+    () => new Date(dateRef.current)
+  );
   const [daysUntilBirthday, setDaysUntilBirthday] = useState<number>(0);
 
-  // Add function to sync date across component
+  // Improved sync function
   const syncDateTime = useCallback(() => {
     const now = new Date();
-    setDate(now);
+    dateRef.current = now;
+
+    // Force a fresh date object creation to trigger re-render
+    setDate(new Date(now));
     setSelectedDate((prev) => {
       const updated = new Date(now);
-      updated.setMonth(prev.getMonth(), prev.getDate());
+      // Preserve the selected month/year while updating the current date
+      updated.setFullYear(prev.getFullYear());
+      updated.setMonth(prev.getMonth());
       return updated;
     });
   }, []);
 
+  // Single source of truth for date updates
   useEffect(() => {
-    // Initial sync
+    // Immediate sync
     syncDateTime();
 
-    // Update every minute
+    // Minute updates
     const minuteInterval = setInterval(syncDateTime, 60000);
 
-    // Calculate time until next midnight
-    const calculateNextMidnight = () => {
-      const tomorrow = new Date();
+    // Precise midnight update
+    const scheduleMidnightUpdate = () => {
+      const now = new Date();
+      const tomorrow = new Date(now);
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(0, 0, 0, 0);
-      return tomorrow.getTime() - Date.now();
-    };
 
-    // Set up midnight update
-    const scheduleNextMidnight = () => {
-      const timeUntilMidnight = calculateNextMidnight();
+      const timeUntilMidnight = tomorrow.getTime() - now.getTime();
       return setTimeout(() => {
         syncDateTime();
-        midnightTimeout = scheduleNextMidnight();
+        midnightTimeout = scheduleMidnightUpdate();
       }, timeUntilMidnight);
     };
 
-    let midnightTimeout = scheduleNextMidnight();
+    let midnightTimeout = scheduleMidnightUpdate();
 
-    // Sync on visibility change
+    // Handle tab visibility
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         syncDateTime();
       }
     };
+
+    // Handle window focus
+    const handleFocus = () => {
+      syncDateTime();
+    };
+
     document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleFocus);
 
     return () => {
       clearInterval(minuteInterval);
       clearTimeout(midnightTimeout);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleFocus);
     };
   }, [syncDateTime]);
 
