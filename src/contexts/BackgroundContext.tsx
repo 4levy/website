@@ -7,145 +7,132 @@ import {
   useRef,
   useEffect,
   useCallback,
+  memo,
 } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { VIDEOS } from "@/constants/videos";
+
+interface VideoSource {
+  webm: string;
+  mp4: string;
+}
 
 interface BackgroundContextType {
-  currentVideo: string;
-  changeBackground: (video: string) => void;
+  currentVideo: VideoSource;
+  changeBackground: (video: VideoSource) => void;
 }
 
 const BackgroundContext = createContext<BackgroundContextType | undefined>(
   undefined
 );
 
+const VideoPreloader = memo(({ onLoad }: { onLoad: () => void }) => {
+  useEffect(() => {
+    const preloadVideo = async (src: string) => {
+      return new Promise<void>((resolve, reject) => {
+        const video = document.createElement("video");
+        video.preload = "auto";
+        video.onloadeddata = () => resolve();
+        video.onerror = reject;
+        video.src = src;
+      });
+    };
+
+    const loadVideos = async () => {
+      try {
+        await preloadVideo(VIDEOS.default.webm);
+        onLoad();
+      } catch (error) {
+        console.warn("Falling back to MP4");
+        try {
+          await preloadVideo(VIDEOS.default.mp4);
+          onLoad();
+        } catch (err) {
+          console.error("Failed to preload video:", err);
+        }
+      }
+    };
+
+    loadVideos();
+  }, [onLoad]);
+
+  return null;
+});
+
+const BackgroundVideo = memo(({ src }: { src: VideoSource }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.playbackRate = 0.75;
+    video.style.transform = "translate3d(0, 0, 0)";
+
+    const handleLoad = () => {
+      requestAnimationFrame(() => {
+        setIsLoaded(true);
+      });
+    };
+
+    video.addEventListener("canplay", handleLoad);
+    return () => video.removeEventListener("canplay", handleLoad);
+  }, []);
+
+  return (
+    <video
+      ref={videoRef}
+      preload="auto"
+      autoPlay
+      muted
+      loop
+      playsInline
+      disablePictureInPicture
+      className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
+      style={{
+        opacity: isLoaded ? 0.5 : 0,
+        willChange: "transform, opacity",
+        transform: "translate3d(0, 0, 0)",
+      }}
+    >
+      <source src={src.webm} type="video/webm" />
+      <source src={src.mp4} type="video/mp4" />
+    </video>
+  );
+});
+
 export function BackgroundProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [currentVideo, setCurrentVideo] = useState<string | null>(null); // Changed to null initial state
+  const [currentVideo, setCurrentVideo] = useState<VideoSource>(VIDEOS.default);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const isFirstRender = useRef(true);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const isChangingVideo = useRef(false);
 
-  useEffect(() => {
-    // Load initial background video
-    if (!currentVideo && !isChangingVideo.current) {
-      const loadInitialVideo = () => {
-        try {
-          const timestamp = Date.now();
-          const videoPath = `/videos/background.mp4?v=${timestamp}`;
-          setCurrentVideo(videoPath);
-        } catch (err) {
-          console.error("Failed to load initial video:", err);
-          setHasError(true);
-        }
-      };
-
-      loadInitialVideo();
-    }
-  }, [currentVideo]);
-
-  const changeBackground = useCallback((videoName: string) => {
-    if (isChangingVideo.current) return;
-
-    isChangingVideo.current = true;
-    setIsVideoLoaded(false);
-
-    try {
-      // Add logging
-      console.log("Changing background to:", videoName);
-
-      setTimeout(() => {
-        setCurrentVideo(videoName);
-        isFirstRender.current = false;
-        setHasError(false);
-        isChangingVideo.current = false;
-      }, 500); // Increased from 300 to 500ms
-    } catch (err) {
-      console.error("Failed to change video:", err);
-      setHasError(true);
-      isChangingVideo.current = false;
-    }
+  const handleVideoLoaded = useCallback(() => {
+    setIsVideoLoaded(true);
   }, []);
 
-  useEffect(() => {
-    const videoElement = videoRef.current;
-    if (!videoElement || !currentVideo) return;
+  const changeBackground = useCallback(
+    (video: VideoSource) => {
+      if (isChangingVideo.current || currentVideo === video) return;
+      isChangingVideo.current = true;
 
-    const handleCanPlay = () => {
-      console.log("Video can play:", currentVideo); // Debug log
-      setIsVideoLoaded(true);
-      setHasError(false);
-
-      // Add retry logic for play
-      const playVideo = async () => {
-        try {
-          await videoElement.play();
-        } catch (err) {
-          console.error("Play error, retrying:", err);
-          setTimeout(playVideo, 100);
-        }
-      };
-
-      playVideo();
-    };
-
-    const handleError = (e: ErrorEvent) => {
-      console.error("Video error:", e, "Current video:", currentVideo);
-      setHasError(true);
-      setIsVideoLoaded(false);
-    };
-
-    videoElement.addEventListener("canplay", handleCanPlay);
-    videoElement.addEventListener("error", handleError);
-    videoElement.load(); // Force reload
-
-    return () => {
-      videoElement.removeEventListener("canplay", handleCanPlay);
-      videoElement.removeEventListener("error", handleError);
-    };
-  }, [currentVideo]);
+      requestAnimationFrame(() => {
+        setCurrentVideo(video);
+        isChangingVideo.current = false;
+      });
+    },
+    [currentVideo]
+  );
 
   return (
-    <BackgroundContext.Provider
-      value={{ currentVideo: currentVideo || "", changeBackground }}
-    >
-      <div className="fixed inset-0 -z-10 overflow-hidden">
-        {/* Fallback background */}
-        <div
-          className="absolute inset-0 bg-gradient-to-b from-midnight via-deep-navy to-midnight opacity-100 transition-opacity duration-1000"
-          style={{ opacity: isVideoLoaded ? 0 : 1 }}
-        />
-
-        {currentVideo && !hasError && (
-          <video
-            ref={videoRef}
-            preload="auto"
-            autoPlay
-            muted
-            loop
-            playsInline
-            disablePictureInPicture
-            controlsList="nodownload noplaybackrate nopictureinpicture"
-            className="absolute w-full h-full object-cover transition-opacity duration-1000 
-              [&::-webkit-media-controls]:hidden 
-              [&::-webkit-media-controls-panel]:hidden 
-              [&::-webkit-media-controls-play-button]:hidden
-              [&::-webkit-media-controls-picture-in-picture-button]:hidden"
-            style={{
-              opacity: isVideoLoaded ? 0.5 : 0,
-              pointerEvents: "none",
-              WebkitUserSelect: "none",
-              userSelect: "none",
-            }}
-          >
-            <source src={currentVideo} type="video/mp4" />
-          </video>
-        )}
+    <BackgroundContext.Provider value={{ currentVideo, changeBackground }}>
+      <div className="fixed inset-0 -z-10 overflow-hidden bg-midnight">
+        {!isVideoLoaded && <VideoPreloader onLoad={handleVideoLoaded} />}
+        {isVideoLoaded && <BackgroundVideo src={currentVideo} />}
       </div>
       {children}
     </BackgroundContext.Provider>

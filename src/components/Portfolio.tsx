@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import {
   motion,
@@ -9,40 +9,25 @@ import {
   UseInViewOptions,
 } from "framer-motion";
 import { PORTFOLIO_ITEMS } from "@/constants/config";
+import { VIDEOS } from "@/constants/videos";
 import { useBackground } from "@/contexts/BackgroundContext";
-import { getVideoPath } from "@/utils/assetHelpers";
 
 export default function Portfolio() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const { changeBackground } = useBackground();
   const ref = useRef(null);
+  const previousInView = useRef(false);
+  const { changeBackground } = useBackground();
   const isInView = useInView(ref, {
     amount: 0.2,
     once: false,
   } as UseInViewOptions);
 
   useEffect(() => {
-    console.log("Portfolio in view:", isInView);
-
-    if (isInView) {
-      const timestamp = Date.now();
-      changeBackground(`/videos/Background2.mp4?t=${timestamp}`);
-    } else {
-      const timestamp = Date.now();
-      // Only change to background.mp4 if we're not in Discord widget view
-      if (!document.querySelector('[data-discord-active="true"]')) {
-        changeBackground(`/videos/background.mp4?t=${timestamp}`);
-      }
+    if (isInView !== previousInView.current) {
+      previousInView.current = isInView;
+      changeBackground(isInView ? VIDEOS.secondary : VIDEOS.default);
     }
   }, [isInView, changeBackground]);
-
-  const petals = Array.from({ length: 20 }, (_, i) => ({
-    id: i,
-    left: `${(i * 5.27) % 100}%`,
-    top: `${(i * 7.31) % 100}%`,
-    duration: 2 + (i % 3),
-    delay: i * 0.1,
-  }));
 
   return (
     <motion.section
@@ -53,7 +38,13 @@ export default function Portfolio() {
       transition={{ duration: 0.8 }}
     >
       <div className="absolute inset-0 pointer-events-none">
-        {petals.map((petal) => (
+        {Array.from({ length: 20 }, (_, i) => ({
+          id: i,
+          left: `${(i * 5.27) % 100}%`,
+          top: `${(i * 7.31) % 100}%`,
+          duration: 2 + (i % 3),
+          delay: i * 0.1,
+        })).map((petal) => (
           <motion.div
             key={petal.id}
             className="absolute w-3 h-3 bg-pink-200/20 rounded-full"

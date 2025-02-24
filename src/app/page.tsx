@@ -1,18 +1,14 @@
-import Image from "next/image";
 import { getGithubProjects } from "@/utils/github";
 import type { GitHubRepo } from "@/types/github";
 import { Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import { DEVELOPERS } from "@/constants/config";
 import DeveloperCard from "@/components/Developer";
-import DiscordProfile from "@/components/DiscordProfile";
 import ContactSection from "@/components/ContactSection";
 import PlaylistCard from "@/components/PlaylistCard";
-import ThemeToggle from "@/components/ThemeToggle";
 import LocalConditions from "@/components/LocalConditions";
 import RandomImage from "@/components/RandomImage";
 import Footer from "@/components/Footer";
-import PreciseAge from "@/components/PreciseAge";
 import Portfolio from "@/components/Portfolio";
 import Calendar from "@/components/Calendar";
 import ProjectCard from "@/components/ProjectCard";

@@ -2,17 +2,19 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Fira_Code } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/context/ThemeContext";
-import LoadingScreen from "@/components/LoadingScreen";
 import AudioPlayer from "@/components/AudioPlayer";
-import DevDetect from "@/components/DevDetect";
 import DevProtect from "@/components/DevProtect";
 import { BackgroundProvider } from "@/contexts/BackgroundContext";
 import VersionDisplay from "@/components/VersionDisplay";
-import VideoPreloader from "@/components/VideoPreloader";
+
+export const dynamic = "force-dynamic";
+export const runtime = "edge";
+export const preferredRegion = "auto";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -89,8 +91,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="scroll-smooth">
       <head>
+        <link
+          rel="preload"
+          href="/videos/background.webm"
+          as="video"
+          type="video/webm"
+          fetchPriority="high"
+        />
+        <link
+          rel="preload"
+          href="/videos/background.mp4"
+          as="video"
+          type="video/mp4"
+          fetchPriority="low"
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -117,9 +133,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${firaCode.variable} antialiased`}
       >
         <ThemeProvider>
-          <VideoPreloader />
           <DevProtect />
-          <LoadingScreen />
           <BackgroundProvider>
             <VersionDisplay />
             {children}
