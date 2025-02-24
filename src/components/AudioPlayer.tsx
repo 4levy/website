@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { motion } from "framer-motion";
 
 const PLAYLIST = [
   {
@@ -231,14 +232,52 @@ export default function AudioPlayer() {
     setIsVisible(!isVisible);
   };
 
-  const playNextTrack = () => {
-    setCurrentTrackIndex((prev) => (prev + 1) % PLAYLIST.length);
-  };
+  const changeTrack = useCallback(
+    async (index: number) => {
+      if (!audioRef.current || index === currentTrackIndex) return;
 
-  const playPreviousTrack = () => {
-    setCurrentTrackIndex(
-      (prev) => (prev - 1 + PLAYLIST.length) % PLAYLIST.length
-    );
+      try {
+        setIsLoading(true);
+        const wasPlaying = isPlaying;
+
+        setCurrentTrackIndex(index);
+        audioRef.current.src = PLAYLIST[index].src;
+        await audioRef.current.load();
+
+        if (wasPlaying) {
+          const playPromise = audioRef.current.play();
+          if (playPromise) {
+            await playPromise;
+            setIsPlaying(true);
+          }
+        }
+      } catch (error) {
+        console.error("Track change error:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [currentTrackIndex, isPlaying]
+  );
+
+  const playNextTrack = useCallback(() => {
+    const nextIndex = (currentTrackIndex + 1) % PLAYLIST.length;
+    changeTrack(nextIndex);
+  }, [currentTrackIndex, changeTrack]);
+
+  const playPreviousTrack = useCallback(() => {
+    const prevIndex =
+      (currentTrackIndex - 1 + PLAYLIST.length) % PLAYLIST.length;
+    changeTrack(prevIndex);
+  }, [currentTrackIndex, changeTrack]);
+
+  const handleTrackSelect = (index: number) => {
+    if (index === currentTrackIndex && isPlaying) {
+      audioRef.current?.pause();
+      setIsPlaying(false);
+    } else {
+      changeTrack(index);
+    }
   };
 
   return (
@@ -301,7 +340,6 @@ export default function AudioPlayer() {
             </div>
 
             <div className="flex items-center gap-4">
-              {/* Add previous track button */}
               <button
                 onClick={playPreviousTrack}
                 className="w-8 h-8 flex items-center justify-center rounded-full bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 transition-all"
@@ -340,7 +378,6 @@ export default function AudioPlayer() {
                 )}
               </button>
 
-              {/* Add next track button */}
               <button
                 onClick={playNextTrack}
                 className="w-8 h-8 flex items-center justify-center rounded-full bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 transition-all"
@@ -419,12 +456,15 @@ export default function AudioPlayer() {
                 {PLAYLIST.map((track, index) => (
                   <button
                     key={index}
-                    onClick={() => setCurrentTrackIndex(index)}
-                    className={`w-full text-left px-2 py-1 rounded text-xs hover:bg-sky-500/10 transition-colors ${
-                      currentTrackIndex === index
-                        ? "text-sky-300 bg-sky-500/5"
-                        : "text-ice-blue/70"
-                    }`}
+                    onClick={() => handleTrackSelect(index)}
+                    className={`w-full text-left px-2 py-1 rounded text-xs 
+                      ${
+                        currentTrackIndex === index
+                          ? isPlaying
+                            ? "text-sky-300 bg-sky-500/5"
+                            : "text-pink-300 bg-pink-500/5"
+                          : "text-ice-blue/70"
+                      } hover:bg-sky-500/10 transition-colors`}
                   >
                     {track.title}
                   </button>
