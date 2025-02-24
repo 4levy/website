@@ -87,7 +87,7 @@ export default function Home() {
         <div className="text-center">
           <h1 className="hero-title gradient-text mb-6">4levy.xyz</h1>
           <p className="text-lg md:text-xl text-ice-blue/70 max-w-2xl mx-auto text-glow">
-            I will add something here later..
+            Fuck you Localwp and get fuck WordPress
           </p>
         </div>
       </section>
