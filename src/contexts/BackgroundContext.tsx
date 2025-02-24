@@ -14,7 +14,6 @@ import { VIDEOS } from "@/constants/videos";
 
 interface VideoSource {
   webm: string;
-  mp4: string;
 }
 
 interface BackgroundContextType {
@@ -31,29 +30,36 @@ const VideoPreloader = memo(({ onLoad }: { onLoad: () => void }) => {
     const preloadVideo = async (src: string) => {
       return new Promise<void>((resolve, reject) => {
         const video = document.createElement("video");
+        video.crossOrigin = "anonymous";
         video.preload = "auto";
         video.onloadeddata = () => resolve();
-        video.onerror = reject;
+        video.onerror = (e) => reject(new Error(`Video load error: ${e}`));
         video.src = src;
       });
     };
 
+    let isMounted = true;
+
     const loadVideos = async () => {
       try {
         await preloadVideo(VIDEOS.default.webm);
-        onLoad();
-      } catch (error) {
-        console.warn("Falling back to MP4");
-        try {
-          await preloadVideo(VIDEOS.default.mp4);
+        if (isMounted) {
           onLoad();
-        } catch (err) {
-          console.error("Failed to preload video:", err);
+        }
+      } catch (err) {
+        if (isMounted) {
+          // Fallback to just starting without preload
+          console.warn("Video preload failed, continuing anyway");
+          onLoad();
         }
       }
     };
 
     loadVideos();
+
+    return () => {
+      isMounted = false;
+    };
   }, [onLoad]);
 
   return null;
@@ -95,10 +101,8 @@ const BackgroundVideo = memo(({ src }: { src: VideoSource }) => {
         willChange: "transform, opacity",
         transform: "translate3d(0, 0, 0)",
       }}
-    >
-      <source src={src.webm} type="video/webm" />
-      <source src={src.mp4} type="video/mp4" />
-    </video>
+      src={src.webm}
+    />
   );
 });
 

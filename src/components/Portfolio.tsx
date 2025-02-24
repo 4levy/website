@@ -25,9 +25,8 @@ export default function Portfolio() {
   useEffect(() => {
     if (isInView !== previousInView.current) {
       previousInView.current = isInView;
-      changeBackground(isInView ? VIDEOS.secondary : VIDEOS.default);
     }
-  }, [isInView, changeBackground]);
+  }, [isInView]);
 
   return (
     <motion.section
