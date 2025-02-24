@@ -29,7 +29,10 @@ export default function Portfolio() {
       changeBackground(`/videos/Background2.mp4?t=${timestamp}`);
     } else {
       const timestamp = Date.now();
-      changeBackground(`/videos/background.mp4?t=${timestamp}`);
+      // Only change to background.mp4 if we're not in Discord widget view
+      if (!document.querySelector('[data-discord-active="true"]')) {
+        changeBackground(`/videos/background.mp4?t=${timestamp}`);
+      }
     }
   }, [isInView, changeBackground]);
 

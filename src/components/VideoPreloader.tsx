@@ -2,12 +2,19 @@
 
 import { useEffect } from "react";
 
+const VIDEOS_TO_PRELOAD = [
+  "/videos/background.mp4",
+  "/videos/Background2.mp4",
+  "/videos/Background3.mp4",
+];
+
 export default function VideoPreloader() {
   useEffect(() => {
     const preloadVideos = async () => {
       const videos = [
         { name: "background.mp4", path: "/videos/background.mp4" },
         { name: "Background2.mp4", path: "/videos/Background2.mp4" },
+        { name: "Background3.mp4", path: "/videos/Background3.mp4" },
       ];
 
       videos.forEach(({ name, path }) => {

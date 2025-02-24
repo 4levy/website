@@ -16,6 +16,8 @@ import PreciseAge from "@/components/PreciseAge";
 import Portfolio from "@/components/Portfolio";
 import Calendar from "@/components/Calendar";
 import ProjectCard from "@/components/ProjectCard";
+import DiscordWidget from "@/components/DiscordWidget";
+import WakaTimeStats from "@/components/WakaTimeStats";
 
 function ProjectsSkeleton() {
   return (
@@ -65,6 +67,7 @@ function DeveloperSection() {
               <DeveloperCard key={developer.discordId} developer={developer} />
             ))}
             <LocalConditions />
+            <WakaTimeStats />
             <Calendar />
             <RandomImage />
             <ContactSection />
@@ -87,7 +90,7 @@ export default function Home() {
         <div className="text-center">
           <h1 className="hero-title gradient-text mb-6">4levy.xyz</h1>
           <p className="text-lg md:text-xl text-ice-blue/70 max-w-2xl mx-auto text-glow">
-            Fuck you Localwp and get fuck WordPress
+            I will add something here later..
           </p>
         </div>
       </section>
@@ -110,6 +113,12 @@ export default function Home() {
 
       <section id="portfolio" className="py-20">
         <Portfolio />
+      </section>
+
+      <div className="luxury-border my-20 opacity-30" />
+
+      <section id="discordwidget" className="py-20">
+        <DiscordWidget />
       </section>
 
       <Footer />

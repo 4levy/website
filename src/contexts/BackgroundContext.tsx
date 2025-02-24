@@ -56,13 +56,15 @@ export function BackgroundProvider({
     setIsVideoLoaded(false);
 
     try {
-      // Wait for the current video to fade out
+      // Add logging
+      console.log("Changing background to:", videoName);
+
       setTimeout(() => {
         setCurrentVideo(videoName);
         isFirstRender.current = false;
         setHasError(false);
         isChangingVideo.current = false;
-      }, 300); // Match this with your transition duration
+      }, 500); // Increased from 300 to 500ms
     } catch (err) {
       console.error("Failed to change video:", err);
       setHasError(true);
@@ -78,7 +80,18 @@ export function BackgroundProvider({
       console.log("Video can play:", currentVideo); // Debug log
       setIsVideoLoaded(true);
       setHasError(false);
-      videoElement.play().catch((err) => console.error("Play error:", err));
+
+      // Add retry logic for play
+      const playVideo = async () => {
+        try {
+          await videoElement.play();
+        } catch (err) {
+          console.error("Play error, retrying:", err);
+          setTimeout(playVideo, 100);
+        }
+      };
+
+      playVideo();
     };
 
     const handleError = (e: ErrorEvent) => {
