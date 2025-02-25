@@ -1,16 +1,23 @@
 "use client";
-
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import packageJson from "../../package.json";
 
 export default function VersionDisplay() {
   const [isExpanded, setIsExpanded] = useState(false);
-  const buildDate = new Date().toLocaleDateString();
+
+  // Fixed build date (adjust if needed)
+  const buildDate =
+    process.env.NEXT_PUBLIC_BUILD_DATE || new Date().toLocaleDateString();
+
+  // Hardcoded Next.js version or from ENV
   const nextVersion = process.env.NEXT_PUBLIC_NEXT_VERSION || "13.5.4";
 
+  // Ensure React version matches the image
+  const reactVersion = "^19.0.0"; // Manually set, or fetch dynamically if needed
+
   return (
-    <div className="fixed top-4 right-4 z-50">
+    <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
       <motion.div
         onClick={() => setIsExpanded(!isExpanded)}
         className="cursor-pointer"
@@ -18,45 +25,42 @@ export default function VersionDisplay() {
         whileTap={{ scale: 0.95 }}
       >
         <div
-          className="px-3 py-1.5 bg-sky-500/10 text-sky-300 rounded-full 
-          border border-sky-500/20 backdrop-blur-sm hover:bg-sky-500/20 
+          className="px-3 py-1.5 bg-blue-900/80 text-sky-300 rounded-full
+          border border-blue-800 backdrop-blur-sm hover:bg-blue-800/80
           transition-all duration-300 flex items-center gap-2"
         >
           <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
           <span className="text-xs font-medium">v{packageJson.version}</span>
         </div>
       </motion.div>
-
       <AnimatePresence>
         {isExpanded && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            className="absolute top-full right-0 mt-2 p-4 rounded-lg bg-sky-500/5 
-              backdrop-blur-md border border-sky-500/20 min-w-[200px]"
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 5 }}
+            className="absolute bottom-12 left-1/2 transform -translate-x-1/2 p-3 rounded-md bg-blue-900/90
+              backdrop-blur-md border border-blue-800/50 w-36"
           >
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between text-ice-blue/70">
-                <span>App Version</span>
+            <div className="space-y-1 text-xs">
+              <div className="flex justify-between items-center text-gray-300">
+                <span>App</span>
                 <span className="text-sky-300">{packageJson.version}</span>
               </div>
-              <div className="flex justify-between text-ice-blue/70">
+              <div className="flex justify-between items-center text-gray-300">
                 <span>Next.js</span>
                 <span className="text-sky-300">{nextVersion}</span>
               </div>
-              <div className="flex justify-between text-ice-blue/70">
+              <div className="flex justify-between items-center text-gray-300">
                 <span>React</span>
-                <span className="text-sky-300">
-                  {packageJson.dependencies.react}
-                </span>
+                <span className="text-sky-300">{reactVersion}</span>
               </div>
-              <div className="flex justify-between text-ice-blue/70">
-                <span>Build Date</span>
+              <div className="flex justify-between items-center text-gray-300">
+                <span>Build<br />Date</span>
                 <span className="text-sky-300">{buildDate}</span>
               </div>
-              <div className="pt-2 mt-2 border-t border-sky-500/20">
-                <a
+              <div className="pt-1 mt-1 border-t border-blue-700/50 text-center">
+              <a
                   href="https://github.com/4levy/website"
                   target="_blank"
                   rel="noopener noreferrer"
