@@ -2,6 +2,47 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  Sun,
+  Wind,
+  Droplets,
+  Thermometer,
+  Cloud,
+  CloudRain,
+  CloudSnow,
+  CloudLightning,
+} from "lucide-react";
+
+const WeatherIcon = ({
+  condition,
+  className,
+}: {
+  condition: string;
+  className?: string;
+}) => {
+  switch (condition.toLowerCase()) {
+    case "clear":
+    case "sunny":
+      return <Sun className={className} />;
+    case "partly cloudy":
+    case "cloudy":
+    case "overcast":
+      return <Cloud className={className} />;
+    case "rain":
+    case "light rain":
+    case "heavy rain":
+      return <CloudRain className={className} />;
+    case "snow":
+    case "light snow":
+    case "heavy snow":
+      return <CloudSnow className={className} />;
+    case "thunder":
+    case "thunderstorm":
+      return <CloudLightning className={className} />;
+    default:
+      return <Sun className={className} />;
+  }
+};
 
 interface WeatherData {
   location: {
@@ -109,142 +150,98 @@ export default function LocalConditions() {
   }
 
   return (
-    <div className="glass-card p-6 rounded-lg">
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h3 className="text-xl font-bold text-white mb-2">
-            Local Conditions
-          </h3>
-          <p className="text-ice-blue/70 text-sm">
-            {weather.location.name}, {weather.location.country}
-          </p>
-          <p className="text-ice-blue/50 text-xs">
-            Last updated:{" "}
-            {new Date(weather.location.localtime).toLocaleTimeString()}
-          </p>
+    <div className="container max-w-6xl mx-auto">
+      <motion.div
+        className="relative overflow-hidden rounded-xl bg-midnight/40 border border-emerald-500/10
+          hover:border-emerald-500/20 transition-all duration-500"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        whileHover={{ scale: 1.005 }}
+      >
+        <div className="absolute inset-0 pointer-events-none">
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-transparent to-emerald-500/5"
+            animate={{ x: ["0%", "100%", "0%"] }}
+            transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+          />
         </div>
-        <button
-          onClick={() => setIsMetric(!isMetric)}
-          className="px-3 py-1 text-xs bg-sky-500/20 hover:bg-sky-500/30 
-            text-sky-300 rounded-full transition-colors border border-sky-500/20"
-        >
-          {isMetric ? "°C" : "°F"}
-        </button>
-      </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div
-          className="col-span-2 flex items-center justify-between p-4 
-          rounded-lg bg-sky-500/5 border border-sky-500/10"
-        >
-          <div className="flex items-center gap-4">
-            <img
-              src={weather.current.condition.icon}
-              alt={weather.current.condition.text}
-              className="w-12 h-12"
-            />
-            <div>
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={isMetric ? "C" : "F"}
-                  initial={{ y: 10, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: -10, opacity: 0 }}
-                  className="text-2xl font-bold text-white"
+        <div className="relative p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
+            <div className="flex items-center gap-4">
+              <motion.div
+                className="relative w-14 h-14 rounded-2xl overflow-hidden bg-gradient-to-br from-emerald-400 to-emerald-600
+                  flex items-center justify-center"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <WeatherIcon
+                  condition={weather.current.condition.text}
+                  className="w-8 h-8 text-white"
+                />
+              </motion.div>
+
+              <div>
+                <motion.h3
+                  className="text-xl font-semibold bg-gradient-to-r from-emerald-300 to-emerald-500 bg-clip-text text-transparent"
+                  whileHover={{ scale: 1.05 }}
                 >
-                  {isMetric
-                    ? `${weather.current.temp_c}°C`
-                    : `${weather.current.temp_f}°F`}
-                </motion.div>
-              </AnimatePresence>
-              <p className="text-sm text-ice-blue/70">
-                {weather.current.condition.text}
-              </p>
+                  Local Conditions
+                </motion.h3>
+                <p className="text-sm text-emerald-300/60">
+                  {weather.location.name}, {weather.location.country}
+                </p>
+              </div>
+            </div>
+
+            <div className="w-full sm:w-auto grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <WeatherStat
+                icon={<Thermometer className="w-4 h-4" />}
+                label="Temperature"
+                value={`${weather.current.temp_c}°C`}
+              />
+              <WeatherStat
+                icon={<Droplets className="w-4 h-4" />}
+                label="Humidity"
+                value={`${weather.current.humidity}%`}
+              />
+              <WeatherStat
+                icon={<Wind className="w-4 h-4" />}
+                label="Wind"
+                value={`${weather.current.wind_kph} km/h`}
+              />
+              <WeatherStat
+                icon={<Sun className="w-4 h-4" />}
+                label="UV Index"
+                value={`${weather.current.uv}`}
+              />
             </div>
           </div>
         </div>
-
-        <WeatherStat
-          label="Wind"
-          value={`${weather.current.wind_kph} km/h ${weather.current.wind_dir}`}
-          subValue={`Gusts: ${weather.current.gust_kph} km/h`}
-          icon="🌬️"
-        />
-
-        <WeatherStat
-          label="Humidity"
-          value={`${weather.current.humidity}%`}
-          subValue={`Dewpoint: ${
-            isMetric
-              ? `${weather.current.dewpoint_c}°C`
-              : `${weather.current.dewpoint_f}°F`
-          }`}
-          icon="💧"
-        />
-
-        <WeatherStat
-          label="Pressure"
-          value={`${weather.current.pressure_mb} mb`}
-          subValue={`${weather.current.pressure_in} in`}
-          icon="📊"
-        />
-
-        <WeatherStat
-          label="Visibility"
-          value={`${weather.current.vis_km} km`}
-          subValue={`${weather.current.vis_miles} miles`}
-          icon="👁️"
-        />
-
-        <WeatherStat
-          label="UV Index"
-          value={getUVLevel(weather.current.uv).text}
-          valueClassName={getUVLevel(weather.current.uv).color}
-          icon="☀️"
-        />
-
-        <WeatherStat
-          label="Cloud Cover"
-          value={`${weather.current.cloud}%`}
-          icon="☁️"
-        />
-      </div>
-
-      <div className="mt-4 p-3 rounded-lg bg-sky-500/5 border border-sky-500/10">
-        <div className="flex items-center gap-2 text-xs text-ice-blue/50">
-          <span>
-            📍 {weather.location.lat.toFixed(2)}°N,{" "}
-            {weather.location.lon.toFixed(2)}°E
-          </span>
-          <span>|</span>
-          <span>🌍 {weather.location.tz_id}</span>
-        </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
 
 function WeatherStat({
+  icon,
   label,
   value,
-  subValue,
-  icon,
-  valueClassName = "text-sky-300",
 }: {
+  icon: React.ReactNode;
   label: string;
   value: string;
-  subValue?: string;
-  icon: React.ReactNode;
-  valueClassName?: string;
 }) {
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg bg-sky-500/5 border border-sky-500/10">
-      <div className="p-2 rounded-full bg-sky-500/10 text-sky-400">{icon}</div>
+    <motion.div
+      className="flex items-center gap-2 bg-emerald-500/5 rounded-lg p-2 sm:p-3"
+      whileHover={{ scale: 1.05 }}
+    >
+      <div className="text-emerald-400">{icon}</div>
       <div>
-        <p className="text-xs text-ice-blue/50">{label}</p>
-        <p className={`text-sm font-medium ${valueClassName}`}>{value}</p>
-        {subValue && <p className="text-xs text-ice-blue/40">{subValue}</p>}
+        <p className="text-xs text-emerald-300/60">{label}</p>
+        <p className="text-sm font-medium text-emerald-200">{value}</p>
       </div>
-    </div>
+    </motion.div>
   );
 }
