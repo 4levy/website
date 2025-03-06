@@ -15,14 +15,26 @@ import ProjectCard from "@/components/ProjectCard";
 import DiscordWidget from "@/components/DiscordWidget";
 import WakaTimeStats from "@/components/WakaTimeStats";
 
+const LoadingFallback = () => (
+  <div className="min-h-screen bg-midnight/50 backdrop-blur-sm animate-pulse">
+    <div className="container max-w-6xl mx-auto px-4 py-20">
+      <div className="h-8 w-48 bg-sky-500/20 rounded mb-8" />
+      <div className="grid gap-6">
+        <div className="h-32 bg-sky-500/10 rounded-xl" />
+        <div className="h-32 bg-sky-500/10 rounded-xl" />
+      </div>
+    </div>
+  </div>
+);
+
 function ProjectsSkeleton() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      {[1, 2, 3, 4].map((i) => (
+      {Array.from({ length: 4 }).map((_, i) => (
         <div key={i} className="glass-card p-6 rounded-lg animate-pulse">
-          <div className="h-8 bg-[#1E90FF]/20 rounded w-3/4 mb-4"></div>
-          <div className="h-4 bg-[#1E90FF]/20 rounded w-full mb-4"></div>
-          <div className="h-4 bg-[#1E90FF]/20 rounded w-1/2"></div>
+          <div className="h-8 bg-[#1E90FF]/20 rounded w-3/4 mb-4" />
+          <div className="h-4 bg-[#1E90FF]/20 rounded w-full mb-4" />
+          <div className="h-4 bg-[#1E90FF]/20 rounded w-1/2" />
         </div>
       ))}
     </div>
@@ -32,7 +44,7 @@ function ProjectsSkeleton() {
 async function Projects() {
   const projects = await getGithubProjects();
 
-  if (projects.length === 0) {
+  if (!projects?.length) {
     return (
       <div className="glass-card col-span-2 text-center p-8 rounded-lg">
         <p className="text-ice-blue/70">No featured projects available.</p>
@@ -77,19 +89,24 @@ function DeveloperSection() {
   );
 }
 
+function HeroSection() {
+  return (
+    <section className="h-screen flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="hero-title gradient-text mb-6">4levy.xyz</h1>
+        <p className="text-lg md:text-xl text-ice-blue/70 max-w-2xl mx-auto text-glow">
+          I will add something here later..
+        </p>
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   return (
     <main className="min-h-screen p-8 md:p-24 relative">
       <Navbar />
-
-      <section className="h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="hero-title gradient-text mb-6">4levy.xyz</h1>
-          <p className="text-lg md:text-xl text-ice-blue/70 max-w-2xl mx-auto text-glow">
-            I will add something here later..
-          </p>
-        </div>
-      </section>
+      <HeroSection />
 
       <div className="luxury-border my-20 opacity-30" />
 
@@ -103,7 +120,7 @@ export default function Home() {
         </Suspense>
       </section>
 
-      <Suspense fallback={<div>Loading about...</div>}>
+      <Suspense fallback={<LoadingFallback />}>
         <DeveloperSection />
       </Suspense>
 
