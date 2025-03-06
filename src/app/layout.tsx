@@ -3,7 +3,6 @@ import { Geist, Geist_Mono, Fira_Code } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/context/ThemeContext";
 import AudioPlayer from "@/components/AudioPlayer";
-import DevProtect from "@/components/DevProtect";
 import { BackgroundProvider } from "@/contexts/BackgroundContext";
 import VersionDisplay from "@/components/VersionDisplay";
 
@@ -107,33 +106,11 @@ export default function RootLayout({
           type="video/mp4"
           fetchPriority="low"
         />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-            (function() {
-              try {
-                const bypass = /./[Symbol.match];
-                const check = function() {
-                  if (bypass !== /./[Symbol.match]) {
-                    window.location.href = '/blocked';
-                  }
-                };
-                setInterval(check, 500);
-                Object.defineProperty(/./, Symbol.match, {
-                  get: () => bypass,
-                  configurable: false,
-                });
-              } catch(e) {}
-            })();
-          `,
-          }}
-        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${firaCode.variable} antialiased`}
       >
         <ThemeProvider>
-          <DevProtect />
           <BackgroundProvider>
             <VersionDisplay />
             {children}
