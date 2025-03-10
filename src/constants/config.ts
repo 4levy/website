@@ -10,7 +10,8 @@ type AllowedProjects =
   | "Streaming-status"
   | "Custom-status"
   | "Online-VC"
-  | "Executor-Key-Bypass-Discord-Bot";
+  | "Executor-Key-Bypass-Discord-Bot"
+  | "Streaming-status-Bot";
 
 export const GITHUB_CONFIG = {
   API_URL: "https://api.github.com/users/4levy/repos",
@@ -19,6 +20,7 @@ export const GITHUB_CONFIG = {
     "Custom-status",
     "Online-VC",
     "Executor-Key-Bypass-Discord-Bot",
+    "Streaming-status-Bot",
   ] as AllowedProjects[],
 } as const;
 
