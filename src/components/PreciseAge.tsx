@@ -29,7 +29,7 @@ export default function PreciseAge() {
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => {
         setIsHovering(false);
-        setPreciseAge(16);
+        setPreciseAge(17);
       }}
       className="inline-block transition-all duration-200 hover:text-sky-400"
     >
