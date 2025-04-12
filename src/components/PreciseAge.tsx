@@ -33,7 +33,7 @@ export default function PreciseAge() {
       }}
       className="inline-block transition-all duration-200 hover:text-sky-400"
     >
-      {isHovering ? preciseAge.toFixed(7) : '16'}
+      {isHovering ? preciseAge.toFixed(7) : '17'}
     </span>
   );
 }
